@@ -2,6 +2,9 @@
 
 **Information-Theoretic Governance of Heterogeneous Agent Fleets**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647160.svg)](https://doi.org/10.5281/zenodo.19647160)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 Paper artifact repository for v6 of the UNITARES research program.
 
 - 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (26 pages)
@@ -45,17 +48,18 @@ Required packages: `amsmath`, `amssymb`, `mathtools`, `bm`, `graphicx`, `booktab
 ## Citation
 
 ```bibtex
-@misc{wang2026unitares-v6,
-  author       = {Wang, Kenny},
-  title        = {{UNITARES}: Information-Theoretic Governance of Heterogeneous Agent Fleets},
-  year         = {2026},
-  publisher    = {GitHub},
-  howpublished = {\url{https://github.com/CIRWEL/unitares-paper-v6}},
-  note         = {v6.0}
+@article{wang2026unitares-v6,
+  author    = {Wang, Kenny},
+  title     = {{UNITARES}: Information-Theoretic Governance of Heterogeneous Agent Fleets},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.19647160},
+  url       = {https://doi.org/10.5281/zenodo.19647160},
+  version   = {v6.0.1}
 }
 ```
 
-A Zenodo DOI for the same release will be linked here once minted.
+The DOI above resolves to the latest version. The repository is mirrored at <https://github.com/CIRWEL/unitares-paper-v6>.
 
 ## License
 
