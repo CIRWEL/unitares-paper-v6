@@ -1888,8 +1888,9 @@ with \texttt{-{}-csv} produces a row-level dump for further
 analysis.
 
 \subsection{Limits of the Snapshot}
+\label{sec:limits-snapshot}
 
-The production data has four limitations that bound the strength of
+The production data has five limitations that bound the strength of
 our empirical claims:
 \begin{enumerate}
 \item \textbf{Parameter evolution:} Dynamics parameters, governor
@@ -1912,6 +1913,19 @@ our empirical claims:
   verdict counterfactual (\Cref{sec:verdict-counterfactual}) are
   from a 30-day window ending April~18,~2026, during which the
   population grew from 903 to 3{,}286 registered identities.
+\item \textbf{Identity-system maturity:} The measurement window
+  includes material revisions to the identity-resolution layer that
+  landed in mid-to-late April~2026---removal of name-claim lookup,
+  adoption of UUID-direct dispatch, and receipt-based onboarding
+  authentication. Class assignment is tag-based on the identity record
+  (\Cref{sec:class-structure}), so an identity whose tags were
+  inherited from a cached binding or from an archived predecessor
+  may appear in a class whose envelope does not match its actual
+  operational regime. We expect this to affect a bounded fraction of
+  rows rather than the aggregate direction of the per-class envelopes,
+  but we have not filtered the counterfactual to post-fix identities;
+  a re-measurement on identity-clean data, once sufficient post-fix
+  history has accumulated, is deferred to subsequent work.
 \end{enumerate}
 
 
@@ -2188,6 +2202,13 @@ the same infrastructure.
 \item The PID governor gains ($K_p$, $K_i$, $K_d$) were tuned
   empirically; optimal gain selection via, e.g., Ziegler-Nichols
   or LQR methods is future work.
+\item The empirical program of \Cref{sec:experiments} was computed
+  over a window that overlaps with material identity-system revisions
+  (\Cref{sec:limits-snapshot}, item~5). A replication of the per-class
+  calibration (\Cref{sec:phase-2-measurement}) and the verdict
+  counterfactual (\Cref{sec:verdict-counterfactual}) on identities
+  that post-date those revisions is the natural validation path and
+  is deferred to subsequent work.
 \end{enumerate}
 
 % ═══════════════════════════════════════════════════════════
