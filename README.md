@@ -5,7 +5,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647159.svg)](https://doi.org/10.5281/zenodo.19647159)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (29 pages, latest tag `paper-v6.5`)
+- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (29 pages, latest tag `paper-v6.6`)
 - 📝 [`unitares-v6.tex`](./unitares-v6.tex) — LaTeX source
 - 🖼 [`figures/`](./figures/) — 6 figures from deployment data (Feb 20, 2026 snapshot; Apr 18, 2026 30-day window)
 
@@ -66,11 +66,11 @@ Required packages: `amsmath`, `amssymb`, `mathtools`, `bm`, `graphicx`, `booktab
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.19647159},
   url       = {https://doi.org/10.5281/zenodo.19647159},
-  version   = {v6.5}
+  version   = {v6.6}
 }
 ```
 
-The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.5`) has its own version DOI.
+The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.6`) has its own version DOI.
 
 ## License
 
