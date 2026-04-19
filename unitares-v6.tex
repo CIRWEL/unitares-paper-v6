@@ -1031,16 +1031,17 @@ The adaptive governor produces a binary verdict:
 where $R$ is the risk score derived from $\Phi$ (\Cref{eq:phi}).
 
 \begin{remark}[Two-Tier vs.\ Three-Tier Governance]
-An earlier design used three tiers: approve/revise/reject.
-In production, the middle \texttt{revise} state was ambiguous---agents
-receiving a ``revise'' verdict had no actionable signal for \emph{what}
-to revise, leading to oscillation between revise and approve as
-marginal coherence values crossed the threshold. The two-tier design
-eliminates this source of instability: agents either proceed (the
-system is contracting normally) or pause (wait for human or
-environmental input to shift the state). The PID governor's continuous
-threshold adaptation provides the nuance that the discrete middle tier
-attempted to capture.
+An earlier design used three tiers: approve/revise/reject. We
+abandoned the three-tier form on design grounds rather than from a
+measured oscillation study: a \texttt{revise} verdict carries no
+information about \emph{what} to revise, which makes it operationally
+indistinguishable from \texttt{proceed} for agents whose next action is
+unchanged by the verdict's content. The two-tier design replaces the
+ambiguous middle state with a binary contract (proceed / pause) and
+delegates the nuance that \texttt{revise} attempted to encode to the
+PID governor's continuous threshold adaptation, which does carry a
+derivative signal. A controlled oscillation-rate comparison between
+the two- and three-tier forms remains future work.
 \end{remark}
 
 
@@ -1445,6 +1446,22 @@ worth doing independently of any migration: it makes governance
 decisions auditable and presentation choices revisable in
 isolation.
 
+As a concrete second example, consider an RLHF-governed deployment
+whose gating signal is a reward-model score $r(x, y)$ and whose
+operators wish to migrate to a calibrated reward $\tilde{r}(x, y)$
+derived from a revised preference model without changing refusal or
+escalation behavior during the transition. The pipeline structure
+maps directly: the \emph{phases} stage computes the legacy $r$ and
+issues the gate; the \emph{enrichments} stage computes $\tilde{r}$,
+writes it to a canonical \texttt{reward} field, and copies $r$ to
+\texttt{reward\_legacy}. Downstream dashboards and calibration
+pipelines see $\tilde{r}$; refusal logic continues to read $r$. The
+audit log tags each row with the active migration phase, so a
+divergence study over a held-out corpus can characterize where
+$\tilde{r}$ and $r$ would disagree before any Phase 3 cutover. The
+mechanism is identical; only the coordinate being re-grounded
+changes.
+
 
 % ═══════════════════════════════════════════════════════════
 \section{Stochastic Extensions}
@@ -1484,9 +1501,16 @@ $\sigma_{\max}^2 / (2\alpha_c)$.
 \end{theorem}
 
 \begin{remark}[Verification for Production Noise Model]
-In production, the diffusion matrix is
+In production, the diffusion matrix is taken as
 $G = \operatorname{diag}(0, 0, \sigma, 0)$ with $\sigma = 0.02$
-(additive noise on the entropy channel only). For any diagonal metric
+(additive noise on the entropy channel only). This is a modeling
+choice chosen to be conservatively large relative to the entropy
+fluctuations observable in the audit log under stationary task load;
+an empirical trace-level estimate of $\sigma$ from per-agent $S_t$
+time series is future work. The qualitative conclusion below (noise
+an order of magnitude below typical signal excursions) tolerates
+$\sigma$ varying by a factor of $2$ in either direction; a larger
+departure would warrant re-derivation. For any diagonal metric
 $M = \operatorname{diag}(m_E, m_I, m_S, m_V)$:
 \[
   \operatorname{tr}(G^\top M G) = m_S \sigma^2
