@@ -8,9 +8,23 @@
 #   2. README.md                              (this repo)
 #   3. README.md                              (companion unitares repo)
 #
-# This script edits all three. It does NOT commit, tag, or push — the
-# author retains control over the git history. Run it, review the diffs,
-# then commit when satisfied.
+# This script edits files only. It does NOT commit, tag, push, or cut
+# releases — the author retains control over git and GitHub state.
+# Run it, review the diffs, then run the full release ritual yourself.
+#
+# Full release ritual (what this script is one step of):
+#
+#   1. ./scripts/sync-paper-version.sh vX.Y     # this script
+#   2. Review diffs, rebuild PDF, commit both repos
+#   3. git tag -a paper-vX.Y -m "..."
+#   4. git push && git push origin paper-vX.Y
+#   5. gh release create paper-vX.Y --latest \
+#          --title "Paper vX.Y: ..." --notes-file <path>
+#
+# Step 5 is load-bearing for citation: Zenodo's GitHub integration mints
+# the version DOI on Release events, NOT on tag pushes. A tag without a
+# corresponding Release leaves the concept DOI pointing at the last
+# properly-released version — the Zenodo badge will silently go stale.
 #
 # Usage:
 #   ./scripts/sync-paper-version.sh v6.7
@@ -126,4 +140,13 @@ echo "[sync] done. Review the diffs:"
 echo "  (cd $PAPER_REPO && git diff -- CITATION.cff README.md)"
 echo "  (cd $UNITARES_REPO && git diff -- README.md)"
 echo
-echo "[sync] next: commit both repos, tag $TAG in the paper repo, push."
+echo "[sync] remaining release ritual (do NOT skip the gh release step):"
+echo "  1. rebuild PDF: (cd $PAPER_REPO && tectonic unitares-v6.tex)"
+echo "  2. commit both repos"
+echo "  3. (cd $PAPER_REPO && git tag -a $TAG -m \"Paper $VERSION: <tagline>\")"
+echo "  4. (cd $PAPER_REPO && git push && git push origin $TAG)"
+echo "  5. gh release create $TAG --repo CIRWEL/unitares-paper-v6 --latest \\"
+echo "       --title \"Paper $VERSION: <tagline>\" --notes-file <path>"
+echo
+echo "[sync] why step 5 matters: Zenodo mints the version DOI on Release"
+echo "       events, not on tag pushes. Skipping it leaves the badge stale."
