@@ -1,0 +1,34 @@
+{
+  "title": "UNITARES: Information-Theoretic Governance of Heterogeneous Agent Fleets",
+  "description": "<p>We present UNITARES, a governance framework for heterogeneous fleets of autonomous AI agents. Each agent carries a four-dimensional state vector intended to support continuous governance rather than discrete after-the-fact filtering. The central design constraint is heterogeneity: the populations we govern include embodied agents with sensor-driven state, persistent autonomous services, session-bounded coding assistants, and ephemeral parser agents. These do not share an output modality, a tempo, or a healthy operating point, so fleet-wide normalization is the wrong target.</p><p>UNITARES addresses this with two structural moves. First, it reinterprets the EISV coordinates in information-theoretic terms: S as response-distribution entropy, I as context-response mutual information, E as negative variational free energy or a resource-rate proxy, and V as an accumulated free-energy residual. Second, it makes normalization class-conditional: scale constants and healthy operating points are functions of an agent class keyed on existing identity tags, with fleet-wide defaults retained only as fallback behavior.</p><p>Because UNITARES was already deployed, re-grounding the coordinates raised a live-systems problem in addition to a mathematical one. We therefore introduce a pipeline-ordering migration mechanism that preserves governance behavior while allowing grounded values to populate canonical response fields. Stability of the dynamics is preserved under the reformulation and established by contraction analysis (Appendix B).</p><p>We illustrate the framework with a production deployment snapshot from February 20, 2026, covering 903 registered agents and 75 active agents. These results should be read as partial deployment evidence for the framework and migration strategy, not as full empirical validation of the class-conditional grounding. Per-class calibration results and higher-tier estimators (logprob and multi-sample) are deferred to subsequent work.</p>",
+  "creators": [
+    {
+      "name": "Wang, Kenny",
+      "affiliation": "CIRWEL Systems"
+    }
+  ],
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "access_right": "open",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "autonomous governance",
+    "information theory",
+    "variational free energy",
+    "heterogeneous multi-agent systems",
+    "class-conditional calibration",
+    "AI safety",
+    "free energy principle",
+    "Shannon entropy",
+    "agent monitoring",
+    "live system migration"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/CIRWEL/unitares",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "notes": "Phase 1 of the EISV grounding program. Per-class calibration results are deferred to subsequent work. Supersedes earlier UNITARES formulations (v3, v5) that used a thermodynamically-inspired phenomenological framing."
+}

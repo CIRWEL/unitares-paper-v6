@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+title: "UNITARES: Information-Theoretic Governance of Heterogeneous Agent Fleets"
+message: "If you use or cite this work, please cite it as below."
+type: article
+authors:
+  - family-names: Wang
+    given-names: Kenny
+    affiliation: "CIRWEL Systems"
+date-released: 2026-04-18
+version: "v6.0"
+url: "https://github.com/CIRWEL/unitares-paper-v6"
+license: CC-BY-4.0
+abstract: >
+  We present UNITARES, a governance framework for heterogeneous fleets of
+  autonomous AI agents. Each agent carries a four-dimensional state vector
+  intended to support continuous governance rather than discrete after-the-fact
+  filtering. The central design constraint is heterogeneity: the populations
+  we govern include embodied agents with sensor-driven state, persistent
+  autonomous services, session-bounded coding assistants, and ephemeral parser
+  agents.
+
+  UNITARES addresses this with two structural moves. First, it reinterprets
+  the EISV coordinates in information-theoretic terms: S as response-distribution
+  entropy, I as context-response mutual information, E as negative variational
+  free energy or a resource-rate proxy, and V as an accumulated free-energy
+  residual. Second, it makes normalization class-conditional: scale constants
+  and healthy operating points are functions of an agent class keyed on existing
+  identity tags.
+
+  Because UNITARES was already deployed, re-grounding the coordinates raised
+  a live-systems problem in addition to a mathematical one. We introduce a
+  pipeline-ordering migration mechanism that preserves governance behavior
+  while allowing grounded values to populate canonical response fields.
+keywords:
+  - autonomous governance
+  - information theory
+  - variational free energy
+  - heterogeneous multi-agent systems
+  - class-conditional calibration
+  - AI safety
