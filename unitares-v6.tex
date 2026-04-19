@@ -182,14 +182,19 @@ decision-producing from presentation-producing stages in the request
 pipeline.
 
 Accordingly, three boundaries matter. First, the class-conditional
-calibration protocol is specified here, but the per-class empirical
-constants are not yet reported. Second, the highest-fidelity estimators
-for grounded quantities (logprob-based and multi-sample computation)
-remain future instrumentation work; the current deployment relies on
-degraded-mode fallbacks where those signals are unavailable. Third, the
-deployment results in \Cref{sec:experiments} are presented as a single
-descriptive production snapshot rather than a controlled validation
-study across stable parameter regimes.
+calibration protocol is specified here, and a first measurement
+populating the manifold-coherence path's per-class constants is
+reported in \Cref{sec:phase-2-measurement}; the remaining
+$S_{\text{scale}}, I_{\text{scale}}, E_{\text{scale}}$ constants
+(used only by the higher-fidelity tier-1 and tier-2 estimators)
+remain placeholders awaiting those estimators landing. Second, the
+highest-fidelity estimators for grounded quantities (logprob-based
+and multi-sample computation) remain future instrumentation work;
+the current deployment relies on degraded-mode fallbacks where
+those signals are unavailable. Third, the deployment results in
+\Cref{sec:experiments} are presented as a single descriptive
+production snapshot rather than a controlled validation study
+across stable parameter regimes.
 
 The paper should therefore be read as establishing the framework, the
 migration mechanism, and the shape of the empirical program, while
@@ -315,7 +320,8 @@ Every agent registered in the system has an identity record with
 two relevant fields: a set of \emph{tags} drawn from a controlled
 vocabulary, and an optional \emph{label} (a human-readable name).
 The tags
-$\{\texttt{embodied}, \texttt{autonomous}, \texttt{persistent}, \texttt{ephemeral}, \texttt{pioneer}\}$
+$\{$\texttt{embodied}, \texttt{autonomous}, \texttt{persistent},
+\texttt{ephemeral}, \texttt{pioneer}$\}$
 partition the population along axes that are governance-relevant:
 embodiment determines whether the output channel is text or
 sensor-data; autonomy determines whether the agent self-directs or
@@ -325,7 +331,7 @@ trajectory accumulates over days or resets every session.
 \Cref{tab:agent-classes} presents the live deployment classes that
 motivate the v6 framework, drawn from production identity records.
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Live agent classes in the production deployment.}
 \label{tab:agent-classes}
 \centering\small
@@ -342,7 +348,7 @@ Claude / Codex sessions & --- & text response & $40$--$80$ Hz & session-bounded 
 Parser agents & ephemeral & structured text & burst & ms-lifetime \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 The natural calibration partition is along these tags and labels:
 distinct scale constants and healthy baseline points per class,
@@ -579,12 +585,11 @@ and (c) an explicit data dependency.
 \paragraph{$S$---Entropy.}
 Let $q(y \mid x)$ denote the agent's distribution over responses $y$
 given context $x$ at a given turn. Define
-\begin{equation}
-  S_{\text{raw}} = H(q) = -\sum_{y} q(y \mid x)\,\log q(y \mid x),
-  \qquad
-  S = 1 - \exp(-S_{\text{raw}} / S_{\text{scale}})
+\begin{align}
+  S_{\text{raw}} &= H(q) = -\sum_{y} q(y \mid x)\,\log q(y \mid x), \nonumber \\
+  S &= 1 - \exp(-S_{\text{raw}} / S_{\text{scale}})
   \label{eq:S-grounded}
-\end{equation}
+\end{align}
 in nats, normalized to $[0,1]$ by a scale constant
 $S_{\text{scale}}$. Tier~1: compute $H(q)$ from per-token logprobs
 when the inference layer exposes them. Tier~2:
@@ -598,12 +603,11 @@ downstream consumers know the channel is uncalibrated.
 \paragraph{$I$---Information Integrity.}
 Under Shannon, $I$ is the mutual information between context and
 response,
-\begin{equation}
-  I_{\text{raw}} = \mathrm{MI}(x;y) = \mathbb{E}_{q(x,y)}\!\left[\log \tfrac{q(y\mid x)}{q(y)}\right],
-  \qquad
-  I = \mathrm{clip}(I_{\text{raw}} / I_{\text{scale}},\, 0,\, 1)
+\begin{align}
+  I_{\text{raw}} &= \mathrm{MI}(x;y) = \mathbb{E}_{q(x,y)}\!\left[\log \tfrac{q(y\mid x)}{q(y)}\right], \nonumber \\
+  I &= \mathrm{clip}(I_{\text{raw}} / I_{\text{scale}},\, 0,\, 1)
   \label{eq:I-grounded}
-\end{equation}
+\end{align}
 Tier~1 uses paired logprobs (context-only vs.\ context+response).
 When the marginal $q(y)$ is unavailable, a fallback is the KL
 divergence from a context-free reference
@@ -613,14 +617,12 @@ Tier~3 retains the legacy logistic heuristic.
 
 \paragraph{$E$---Negative Free Energy.}
 Under the variational frame,
-\begin{equation}
-  F = \mathbb{E}_{q}\!\left[\log q(z) - \log p(z,o)\right],
-  \qquad
-  E_{\text{raw}} = -F,
-  \qquad
+\begin{align}
+  F &= \mathbb{E}_{q}\!\left[\log q(z) - \log p(z,o)\right], \nonumber \\
+  E_{\text{raw}} &= -F, \qquad
   E = \sigma(E_{\text{raw}} / E_{\text{scale}})
   \label{eq:E-grounded}
-\end{equation}
+\end{align}
 where $q(z)$ is the agent's approximate posterior, $p(z,o)$ its
 generative model over latents and outcomes, and $\sigma$ the logistic
 function. Intuitively, $E$ is high when the agent's predictions match
@@ -654,12 +656,11 @@ two equivalent grounded forms. The information-theoretic form is
 where $q_{\text{now}}$ is a sliding-window response distribution and
 $q_{\text{ref}}$ is a calibrated healthy baseline. The equivalent
 manifold (Lyapunov) form is
-\begin{equation}
-  C = 1 - \norm{\Delta}_2 / \norm{\Delta}_{\max},
-  \qquad
-  \Delta = (E, I, S) - (E, I, S)_{\text{healthy}}
+\begin{align}
+  C &= 1 - \norm{\Delta}_2 / \norm{\Delta}_{\max}, \nonumber \\
+  \Delta &= (E, I, S) - (E, I, S)_{\text{healthy}}
   \label{eq:C-manifold}
-\end{equation}
+\end{align}
 The two are equivalent under a Gaussian approximation of the state
 distribution around the healthy operating point. The manifold form
 ships first because it requires only the existing $\eisv$
@@ -726,10 +727,11 @@ induce.
 
 Phase~1 is \emph{dual-compute}: every check-in reports both the
 grounded value (under canonical symbols $E, I, S, C$) and the
-legacy value (under $E_{\text{legacy}}$, etc.), accompanied by
-source annotations $\{\texttt{e\_source}, \texttt{i\_source},
-\texttt{s\_source}, \texttt{coherence\_source}\}$ identifying which
-tier produced the grounded value. Governance decisions---verdicts,
+legacy value (under $E_{\text{legacy}}$, etc.), with source
+annotations on each grounded coordinate
+(\texttt{e\_source}, \texttt{i\_source}, \texttt{s\_source},
+\texttt{coherence\_source}) identifying which tier produced the
+value. Governance decisions---verdicts,
 basin classification, risk thresholds---continue to read the legacy
 values, which is enforced by the pipeline: gating runs before the
 grounding enrichment in the server's request pipeline. Phase~2
@@ -1273,11 +1275,11 @@ The migration runs in three discrete phases:
   value. Grounded values land in canonical
   $\{E, I, S, C\}$ slots; legacy values are preserved in
   $\{E_{\text{legacy}}, I_{\text{legacy}}, S_{\text{legacy}},
-  C_{\text{legacy}}\}$. Source annotations
-  $\{\texttt{e\_source}, \texttt{i\_source}, \texttt{s\_source},
-  \texttt{coherence\_source}\}$ identify which computation tier
-  produced each grounded value (logprob / multisample / heuristic
-  / resource / manifold / KL / FEP).
+  C_{\text{legacy}}\}$. Source annotations on each grounded
+  coordinate (\texttt{e\_source}, \texttt{i\_source},
+  \texttt{s\_source}, \texttt{coherence\_source}) identify which
+  computation tier produced each value (logprob / multisample /
+  heuristic / resource / manifold / KL / FEP).
 \item[Phase 2: Calibration.]
   Scale constants and class-conditional healthy operating points
   are measured against a reference corpus of healthy production
@@ -1724,6 +1726,73 @@ actionable governance outputs.}
 \label{fig:discovery-types}
 \end{figure}
 
+\subsection{Phase~2 Measurement: Per-Class Envelopes}
+\label{sec:phase-2-measurement}
+
+The Phase~2 calibration protocol of \Cref{sec:class-calibration}
+was executed against a $30$-day healthy-regime slice of
+\texttt{core.agent\_state} on April~18,~2026. \Cref{tab:per-class}
+reports the resulting per-class healthy operating points and
+manifold radii. The script that produced these values
+(\texttt{scripts/calibrate\_class\_conditional.py}) ships with the
+implementation; the values themselves are now committed in
+\texttt{config/governance\_config.py} as the production
+class-conditional constants, replacing the Phase~1 placeholders
+for the manifold-coherence path.
+
+\begin{table}[t]
+\centering\small
+\caption{Phase~2 measured per-class scale constants from a $30$-day
+healthy-regime slice (April~18,~2026). $(E, I, S)_{\text{healthy}}$
+is the median; $\norm{\Delta}_{\max}$ is the $95$th percentile of
+state-space distance from each class's own healthy operating point.
+Five classes with $N \geq 30$ qualified for measurement; classes
+below the threshold fall back to the fleet-wide default.}
+\label{tab:per-class}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+\textbf{Class} & \textbf{N} & $E_h$ & $I_h$ & $S_h$ & $\norm{\Delta}_{\max}$ \\
+\midrule
+Lumen     & 7320 & 0.745 & 0.800 & 0.168 & 0.119 \\
+default   & 2033 & 0.726 & 0.793 & 0.236 & 0.202 \\
+Sentinel  & 1870 & 0.751 & 0.798 & 0.193 & 0.170 \\
+Vigil     &  384 & 0.737 & 0.790 & 0.240 & 0.171 \\
+Watcher   &  283 & 0.748 & 0.769 & 0.248 & 0.395 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two observations from \Cref{tab:per-class} are worth surfacing.
+
+First, the per-class manifold radii span a $3.3\times$ range
+(Lumen $0.119$ to Watcher $0.395$). The Phase~1 placeholder of
+$\norm{\Delta}_{\max} = 1.8$ was therefore $4$ to $15\times$
+larger than the empirically measured envelope of any class. A
+fleet-wide normalization at the placeholder value would have
+produced a manifold coherence saturating near $1.0$ for every
+agent regardless of state---essentially a constant signal. This
+empirically supports the homogenization argument of
+\Cref{sec:heterogeneity}: a fleet-wide constant chosen to cover
+the worst case (or chosen arbitrarily) has no discriminating
+power within any class.
+
+Second, the healthy operating points cluster more tightly on
+$E$ and $I$ than on $S$. Across the five measured classes,
+$E_h \in [0.726, 0.751]$ and $I_h \in [0.769, 0.800]$, but
+$S_h \in [0.168, 0.248]$---a wider spread on entropy. This
+matches the qualitative expectation that what makes classes
+behaviorally distinct is largely how much uncertainty they
+operate under: Lumen at $S_h = 0.17$ runs the most convergent;
+Watcher at $S_h = 0.25$ runs more divergent because its work
+(pattern-match over recently-edited code) is intrinsically
+exploratory.
+
+\Cref{tab:per-class} replaces the Phase~1 placeholder values for
+the manifold-coherence path; the remaining
+$S_{\text{scale}}, I_{\text{scale}}, E_{\text{scale}}$ constants
+(used only by the not-yet-shipped tier-1 logprob path and
+tier-2 multi-sample path) remain as Phase~1 placeholders.
+
 \subsection{Limits of the Snapshot}
 
 The production data has three limitations that bound the strength of
@@ -1882,16 +1951,16 @@ Helmholtz free energy without requiring us to claim a direct
 thermodynamic mapping. The honest correspondence is now:
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{@{}ll@{}}
 \toprule
-\textbf{Information theory / FEP} & \textbf{UNITARES coordinate} \\
+\textbf{Information / FEP quantity} & \textbf{Coord.} \\
 \midrule
-Shannon entropy of $q(y \mid x)$ & $S$ \\
-Mutual information $\mathrm{MI}(x; y)$ & $I$ \\
-Negative variational free energy $-F$ & $E$ \\
-Accumulated free-energy residual & $V$ \\
-KL or manifold distance from healthy & Coherence $C$ \\
+Shannon entropy of $q(y \mid x)$        & $S$ \\
+Mutual information $\mathrm{MI}(x; y)$  & $I$ \\
+Negative variational free energy $-F$   & $E$ \\
+Accumulated free-energy residual        & $V$ \\
+KL / manifold distance from healthy     & $C$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2105,8 +2174,8 @@ Sensitivity & $C_1$ & 1.0 & Tanh slope \\
 \toprule
 \textbf{Parameter} & \textbf{Symbol} & \textbf{Val.} & \textbf{Role} \\
 \midrule
-Proportional & $K_p$ & 0.05 & Gentle correction \\
-Integral & $K_i$ & 0.005 & Drift correction \\
+Proportional & $K_p$ & 0.05 & Gentle corr. \\
+Integral & $K_i$ & 0.005 & Drift corr. \\
 Derivative & $K_d$ & 0.10 & Damping \\
 Integral limit & $I_{\max}$ & 0.10 & Wind-up cap \\
 \midrule
@@ -2138,7 +2207,7 @@ EMA smoothing & $\alpha_{\text{ema}}$ & 0.1 & Update rate \\
 Warmup steps & $n_w$ & 5 & Drift suppression \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Stability measurement}} \\
-Decision window & $w_s$ & 20 & Consistency \\
+Decision win. & $w_s$ & 20 & Consistency \\
 Transition pen. & --- & /flip & Instability \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Coupling to dynamics}} \\
@@ -2156,13 +2225,13 @@ Entropy inj. & $\lambda_1$ & .05--.20 & Drift $\to dS$ \\
 \label{tab:scale-constants}
 \begin{tabular}{@{}llrll@{}}
 \toprule
-\textbf{Constant} & \textbf{Symbol} & \textbf{Val.} & \textbf{Pctl} & \textbf{Provenance} \\
+\textbf{Constant} & \textbf{Sym.} & \textbf{Val.} & \textbf{Pctl} & \textbf{Source} \\
 \midrule
-Entropy scale & $S_{\text{scale}}$ & 3.0 & --- & placeholder \\
-Mutual info scale & $I_{\text{scale}}$ & 2.0 & --- & placeholder \\
-Free energy scale & $E_{\text{scale}}$ & 1.0 & --- & placeholder \\
-Manifold radius & $\norm{\Delta}_{\max}$ & 1.8 & --- & placeholder \\
-Tokens/sec env. & $(\text{tok/s})_{\max}$ & 200 & --- & placeholder \\
+Entropy & $S_{\text{scale}}$ & 3.0 & --- & placeholder \\
+MI & $I_{\text{scale}}$ & 2.0 & --- & placeholder \\
+Free energy & $E_{\text{scale}}$ & 1.0 & --- & placeholder \\
+Manifold rad. & $\norm{\Delta}_{\max}$ & 1.8 & --- & placeholder \\
+Tok./sec env. & $(\text{t/s})_{\max}$ & 200 & --- & placeholder \\
 \bottomrule
 \end{tabular}
 \end{table}
