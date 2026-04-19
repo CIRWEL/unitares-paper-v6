@@ -2,7 +2,7 @@
 
 **Information-Theoretic Governance of Heterogeneous Agent Fleets**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647160.svg)](https://doi.org/10.5281/zenodo.19647160)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647159.svg)](https://doi.org/10.5281/zenodo.19647159)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 Paper artifact repository for v6 of the UNITARES research program.
@@ -68,8 +68,8 @@ Required packages: `amsmath`, `amssymb`, `mathtools`, `bm`, `graphicx`, `booktab
   title     = {{UNITARES}: Information-Theoretic Governance of Heterogeneous Agent Fleets},
   year      = {2026},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.19647160},
-  url       = {https://doi.org/10.5281/zenodo.19647160},
+  doi       = {10.5281/zenodo.19647159},
+  url       = {https://doi.org/10.5281/zenodo.19647159},
   version   = {v6.5}
 }
 ```
