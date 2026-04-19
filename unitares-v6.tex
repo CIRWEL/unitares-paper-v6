@@ -92,9 +92,10 @@ A verdict counterfactual on a 30-day production slice
 under class-conditional grounded coherence, with flip rates ranging
 $15$--$33\%$ per class and a strong directional bias into the
 \texttt{low} basin---direct empirical support for the
-homogenization-failure-mode argument. Per-class calibration of the
-remaining scale constants and higher-tier estimators (logprob and
-multi-sample) are deferred to subsequent work.
+homogenization-failure-mode argument. A first per-class calibration
+of the manifold-coherence path is reported here; the remaining scale
+constants and higher-tier estimators (logprob and multi-sample) are
+deferred to subsequent work.
 \end{abstract}
 
 \textbf{Keywords:} autonomous governance, information theory,
@@ -1827,7 +1828,7 @@ analysis.
 
 \subsection{Limits of the Snapshot}
 
-The production data has three limitations that bound the strength of
+The production data has four limitations that bound the strength of
 our empirical claims:
 \begin{enumerate}
 \item \textbf{Parameter evolution:} Dynamics parameters, governor
@@ -2051,25 +2052,26 @@ asks how sensitive the verdict surface is to weight perturbations.
 At the verdict boundary $\Phi = 0.15$, the partial derivatives
 against each weight are the corresponding state-dependent
 contributions:
-\[
-  \frac{\partial \Phi}{\partial w_E} = E,\;
-  \frac{\partial \Phi}{\partial w_I} = -(1-I),\;
-  \frac{\partial \Phi}{\partial w_S} = -S,\;
-  \frac{\partial \Phi}{\partial w_V} = -\abs{V},\;
-  \frac{\partial \Phi}{\partial w_\eta} = -\norm{\deta}^2.
-\]
+\begin{align*}
+  \frac{\partial \Phi}{\partial w_E} &= E,
+  & \frac{\partial \Phi}{\partial w_I} &= -(1-I),
+  & \frac{\partial \Phi}{\partial w_S} &= -S, \\
+  \frac{\partial \Phi}{\partial w_V} &= -\abs{V},
+  & \frac{\partial \Phi}{\partial w_\eta} &= -\norm{\deta}^2.
+\end{align*}
 Evaluating at the production fleet-aggregate operating point
 $(E, I, S, V) = (0.77, 0.88, 0.08, -0.03)$ with healthy
 $\norm{\deta}^2 \lesssim 0.01$:
 \begin{center}
 \small
-\begin{tabular}{@{}lrr@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrl@{}}
 \toprule
 \textbf{Weight} & $\partial\Phi/\partial w_i$ & \textbf{Sign} \\
 \midrule
 $w_E$ & $+0.77$ & promotes proceed \\
-$w_I$ & $-0.12$ & promotes proceed (small, since $I$ is high) \\
-$w_S$ & $-0.08$ & promotes proceed (small, since $S$ is low) \\
+$w_I$ & $-0.12$ & promotes proceed (small; $I$ high) \\
+$w_S$ & $-0.08$ & promotes proceed (small; $S$ low) \\
 $w_V$ & $-0.03$ & negligible \\
 $w_\eta$ & $\lesssim 0.01$ & negligible \\
 \bottomrule
@@ -2154,9 +2156,14 @@ specific migration.
 Stability of the dynamics is preserved under the grounded
 reformulation, with full proof in \Cref{app:contraction-proof}.
 Production deployment statistics from 903~agents over 69~days
-appear in \Cref{sec:experiments}; class-conditional empirical
-results are deferred to subsequent work following the
-measurement protocol of \Cref{sec:class-calibration}.
+appear in \Cref{sec:experiments}; \Cref{sec:phase-2-measurement}
+reports a first class-conditional measurement for the
+manifold-coherence path, and
+\Cref{sec:verdict-counterfactual} shows that $28.9\%$ of basin
+assignments flip under the grounded counterfactual. The remaining
+scale constants and higher-tier estimators are deferred to
+subsequent work following the measurement protocol of
+\Cref{sec:class-calibration}.
 
 The framework's adaptive governor (\Cref{sec:governor}),
 behavioral--epistemic drift vector (\Cref{sec:ethical-drift}),
@@ -2399,6 +2406,7 @@ $\beta$ floor/ceil & $\beta$ & 0.20/0.70 & Hard bounds \\
 \footnotesize
 \caption{Behavioral--Epistemic Drift Vector Parameters}
 \label{tab:drift}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}llrl@{}}
 \toprule
 \textbf{Parameter} & \textbf{Symbol} & \textbf{Val.} & \textbf{Role} \\
@@ -2422,16 +2430,20 @@ Entropy inj. & $\lambda_1$ & .05--.20 & Drift $\to dS$ \\
 \begin{table}[htbp]
 \centering
 \footnotesize
-\caption{Grounding scale constants (\Cref{sec:scale-constants}). All values shipped as placeholders pending class-conditional measurement per the protocol of \Cref{sec:class-calibration}; subsequent work replaces them with measured values.}
+\caption{Grounding scale constants (\Cref{sec:scale-constants}). The
+manifold-coherence path is now measured class-conditionally in
+\Cref{tab:per-class}; the remaining constants below remain
+Phase~1 placeholders pending tier-1/tier-2 calibration work.}
 \label{tab:scale-constants}
-\begin{tabular}{@{}llrll@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllll@{}}
 \toprule
 \textbf{Constant} & \textbf{Sym.} & \textbf{Val.} & \textbf{Pctl} & \textbf{Prov.} \\
 \midrule
 Entropy & $S_{\text{scale}}$ & 3.0 & --- & placeholder \\
 MI & $I_{\text{scale}}$ & 2.0 & --- & placeholder \\
 Free energy & $E_{\text{scale}}$ & 1.0 & --- & placeholder \\
-Manifold rad. & $\norm{\Delta}_{\max}$ & 1.8 & --- & placeholder \\
+Manifold rad. & $\norm{\Delta}_{\max}(c)$ & per $c$ & 95 & measured \\
 Tok./sec env. & $(\text{t/s})_{\max}$ & 200 & --- & placeholder \\
 \bottomrule
 \end{tabular}
@@ -2441,11 +2453,12 @@ The Pctl column records the percentile basis once the constant
 has been measured against a healthy corpus (per
 \Cref{sec:class-calibration}); the Provenance column is one of
 \{\texttt{placeholder}, \texttt{measured}, \texttt{derived}\}
-per \Cref{def:scale-map}. All entries are currently
-\texttt{placeholder}, an explicit signal that they are
-scaffolding values awaiting the class-conditional measurement
-protocol; subsequent work replaces this table with measured
-values that include the date and corpus size for each entry.
+per \Cref{def:scale-map}. The $\norm{\Delta}_{\max}(c)$ row is now
+measured class-conditionally in \Cref{tab:per-class}; the remaining
+entries are still \texttt{placeholder} scaffolding awaiting the
+tier-1/tier-2 calibration work. A later revision can restore the
+date and corpus-size columns once those remaining constants are
+measured.
 
 
 \section{Proof of Contraction (Full)}
