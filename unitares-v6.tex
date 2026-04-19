@@ -256,6 +256,18 @@ dynamical force that couples into the state equations, providing
 contraction-theoretic stability guarantees that statistical methods
 cannot offer.
 
+Concurrent work on runtime governance for agentic systems includes
+MI9~\cite{wang2025mi9}, which combines an agency-risk index with
+finite-state-machine conformance engines and goal-conditioned drift
+detection. UNITARES differs in representation: where MI9 tracks
+conformance to an FSM, UNITARES maintains a continuous four-dimensional
+dynamical state whose evolution itself carries the governance signal.
+Rath~\cite{rath2026agentdrift} independently proposes an Agent
+Stability Index over multi-agent LLM systems as a composite metric;
+UNITARES's ethical drift vector (\Cref{sec:ethical-drift}) couples
+drift back into the governing equations rather than tracking it as an
+external metric.
+
 Control Barrier Functions (CBFs)~\cite{ames2019control} enforce
 forward invariance of safe sets for multi-agent systems. CBFs
 guarantee that the system remains within a safe region but do not
@@ -605,9 +617,10 @@ given context $x$ at a given turn. Define
 in nats, normalized to $[0,1]$ by a scale constant
 $S_{\text{scale}}$. Tier~1: compute $H(q)$ from per-token logprobs
 when the inference layer exposes them. Tier~2:
-self-consistency sampling---draw $k$ responses at temperature
-$T > 0$, group by semantic equivalence, and compute the entropy of
-the equivalence-class distribution as an estimator of $H(q)$.
+semantic entropy~\cite{kuhn2023semantic}---draw $k$ responses at
+temperature $T > 0$, group by semantic equivalence, and compute the
+entropy of the equivalence-class distribution as an estimator of
+$H(q)$.
 Tier~3: retain the legacy heuristic (complexity, ethical drift) as a
 degraded-mode fallback tagged \texttt{s\_source = "heuristic"} so
 downstream consumers know the channel is uncalibrated.
@@ -810,6 +823,24 @@ synchronization (\Cref{thm:network}) is therefore a
 within-class property, as already qualified in \Cref{sec:network};
 fleet-wide synchronization across heterogeneous classes is not
 claimed and would not be expected.
+
+\begin{remark}[Phase 3 re-certification]
+\label{rem:phase3-contraction}
+Phases 1 and 2 (\Cref{sec:migration}) preserve the operational
+$\cv = \tanh$-based form that the contraction proof of
+\Cref{app:contraction-proof} consumes through the off-diagonal
+bound $\beta_I C'_{\max} = 0.15$. In Phase 3, the dynamics
+themselves are rewired to consume a grounded coherence
+(\Cref{eq:C-manifold} or \Cref{eq:C-KL}), which changes the
+relevant Jacobian entries: $\partial \cv / \partial V$ is replaced
+by derivatives with respect to $(E, I, S)$, altering the structure
+of the off-diagonal bound on which the Gershgorin argument
+depends. The contraction certificate therefore does not carry over
+to Phase 3 unconditionally; re-certification at the new operating
+point with the new coherence derivative is required. The proof
+structure of \Cref{app:contraction-proof} adapts, but the
+numerical rate $\alpha_c$ will change.
+\end{remark}
 
 
 
@@ -1420,7 +1451,12 @@ isolation.
 \label{sec:stochastic}
 
 In production, the dynamics are subject to stochastic perturbations
-from unpredictable task inputs. We model this as an It\^{o} SDE:
+from unpredictable task inputs. An alternative Fokker--Planck framing
+of LLM-severity drift as a critical process appears
+in~\cite{carson2025stochastic}; we retain the SDE framing here because
+it composes directly with the contraction analysis of
+\Cref{sec:contraction} via Pham et al.~\cite{pham2009stochastic}. We
+model this as an It\^{o} SDE:
 \begin{equation}
   d\eisv = f(\eisv, t)\,dt + G(\eisv, t)\,dW_t
   \label{eq:sde}
@@ -2275,6 +2311,31 @@ T.~Rebedea, R.~Dinu, M.~Sreedhar, C.~Parisien, and J.~Cohen.
 S.~Ravindran.
 \newblock A predictive framework for {AI} value alignment and drift prevention.
 \newblock \emph{arXiv preprint arXiv:2510.04073}, 2025.
+
+\bibitem[Kuhn et~al.(2023)]{kuhn2023semantic}
+L.~Kuhn, Y.~Gal, and S.~Farquhar.
+\newblock Semantic uncertainty: Linguistic invariances for uncertainty
+  estimation in natural language generation.
+\newblock In \emph{ICLR}, 2023.
+\newblock arXiv:2302.09664.
+
+\bibitem[Wang et~al.(2025)]{wang2025mi9}
+C.~L. Wang, T.~Singhal, A.~Kelkar, and J.~Tuo.
+\newblock {MI9} -- agent intelligence protocol: Runtime governance for agentic {AI}
+  systems.
+\newblock \emph{arXiv preprint arXiv:2508.03858}, 2025.
+
+\bibitem[Rath(2026)]{rath2026agentdrift}
+A.~Rath.
+\newblock Agent drift: Quantifying behavioral degradation in multi-agent {LLM}
+  systems over extended interactions.
+\newblock \emph{arXiv preprint arXiv:2601.04170}, 2026.
+
+\bibitem[Carson(2025)]{carson2025stochastic}
+J.~D. Carson.
+\newblock A stochastic dynamical theory of {LLM} self-adversariality: Modeling
+  severity drift as a critical process.
+\newblock \emph{arXiv preprint arXiv:2501.16783}, 2025.
 
 \bibitem[Ames et~al.(2019)]{ames2019control}
 A.~D. Ames, S.~Coogan, M.~Egerstedt, G.~Notomista, K.~Sreenath, and
