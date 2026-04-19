@@ -119,21 +119,19 @@ differential equations. The state provides a continuous,
 interpretable signal for governance decisions---when to proceed,
 when to pause, when to escalate.
 
-The framework's earliest formulations
-\cite{wang2026unitares-v3,wang2026unitares-v5} were thermodynamically inspired but
-phenomenologically constructed: the coordinates were named after
-physical quantities that they did not actually compute. This paper
-re-grounds the coordinates information-theoretically while
-preserving the dynamics, the verdicts, and the production
-deployment. We further address a design constraint that earlier
-formulations did not surface: the populations the framework
-governs are heterogeneous. They differ in tempo by four orders of
-magnitude, in output modality (text, sensor, system action), and
-in healthy operating point. A governance framework that collapses
-this population to a single state distribution---what we call
-\emph{cosmological soup}---loses signal exactly where signal
-matters. The contributions of this paper are organized around
-these two reframings.
+UNITARES is a deployed framework, extending the line of work
+in~\cite{wang2026unitares-v3,wang2026unitares-v5}, and the v6
+presentation of the framework is organized around two structural
+commitments: information-theoretic grounding of the EISV
+coordinates, and class-conditional calibration that treats
+heterogeneity as a first-class design constraint. The populations
+the framework governs are heterogeneous---they differ in tempo by
+four orders of magnitude, in output modality (text, sensor,
+system action), and in healthy operating point. A governance
+framework that collapses this population to a single state
+distribution---what we call \emph{cosmological soup}---loses
+signal exactly where signal matters. The contributions below are
+organized around these two commitments.
 
 \subsection{Contributions}
 
@@ -145,11 +143,10 @@ This paper makes five contributions:
   single-population stability, as the governing design constraint for a
   production agent-governance framework.
 
-\item \textbf{Information-theoretic reinterpretation of EISV}
-  (\Cref{sec:grounding}): We replace the earlier thermodynamic labeling
-  with computable information-theoretic semantics for the EISV
-  coordinates, together with tiered estimation recipes and provenance
-  tags.
+\item \textbf{Information-theoretic grounding of EISV}
+  (\Cref{sec:grounding}): We give each coordinate computable
+  information-theoretic semantics, together with tiered estimation
+  recipes and provenance tags.
 
 \item \textbf{Class-conditional calibration protocol}
   (\Cref{sec:class-calibration}): We formalize scale constants and
@@ -452,17 +449,13 @@ coordinate to \Cref{sec:grounding}.
 \end{definition}
 
 \begin{remark}[State-space bounds]
-Earlier formulations of UNITARES used wider nominal bounds
-($S_{\max} = V_{\max} = 2$) without empirical justification.
-Production data
-(\Cref{sec:experiments}) shows $V \in [-0.089, 0.007]$ and
-$S \approx 0.08$ across the active fleet, two orders of magnitude
-inside the wider bounds. The grounded definitions of
-\Cref{sec:grounding} normalize each coordinate to $[0,1]$
-(or $[-1,1]$ for $V$) by construction via the scale constants of
-\Cref{sec:class-calibration}, so the wider bounds were never
-load-bearing. v6 narrows the state space to $[0,1]^3 \times [-1,1]$
-to match the normalization.
+The grounded definitions of \Cref{sec:grounding} normalize each
+coordinate to $[0,1]$ (or $[-1,1]$ for $V$) by construction via
+the scale constants of \Cref{sec:class-calibration}. Production
+data (\Cref{sec:experiments}) shows $V \in [-0.089, 0.007]$ and
+$S \approx 0.08$ across the active fleet---two orders of
+magnitude inside the nominal bounds---consistent with the
+normalization acting as intended.
 \end{remark}
 
 \subsection{Governing Equations}
@@ -482,11 +475,15 @@ The dynamics are:
   \label{eq:dV}
 \end{align}
 
-where $g_I(I)$ is the information integrity self-regulation term
-(\Cref{sec:saturation}), $\cv$ is the coherence function
-(\Cref{sec:coherence}), $\norm{\deta}$ is the behavioral--epistemic drift norm
-(\Cref{sec:ethical-drift}), $\mathcal{C} \in [0,1]$ is task
-complexity, and $\xi(t)$ is a noise process with intensity $\sigma$.
+where $g_I(I) = \gamma_I I$ is the information integrity
+self-regulation term, $\cv$ is the coherence function
+(\Cref{sec:coherence}), $\norm{\deta}$ is the
+behavioral--epistemic drift norm (\Cref{sec:ethical-drift}),
+$\mathcal{C} \in [0,1]$ is task complexity, and $\xi(t)$ is a
+noise process with intensity $\sigma$. A logistic alternative
+$g_I^{\log}(I) = \gamma_I I(1-I)$ has a boundary-saturation
+pathology that the linear form avoids; the analysis is collected
+in \Cref{app:saturation}.
 
 \begin{remark}[Coupling structure under the grounded interpretation]
 The coupling structure carries direct information-theoretic
@@ -499,9 +496,7 @@ point); $S$ relaxes toward its prior under stationary conditions
 ($-\mu S$) and is driven up by behavioral--epistemic drift and task complexity;
 $V$ accumulates the $E{-}I$ residual with damping $\delta$, which
 under the grounded interpretation is the exponentially-weighted
-free-energy debt of \Cref{eq:V-grounded}. The arithmetic is
-unchanged from earlier UNITARES formulations; the meaning is
-upgraded.
+free-energy debt of \Cref{eq:V-grounded}.
 \end{remark}
 
 \subsection{Coherence Function (Operational Form)}
@@ -562,10 +557,9 @@ Governance verdicts follow thresholds: $\Phi \geq 0.15$ (proceed),
 $0 \leq \Phi < 0.15$ (caution), $\Phi < 0$ (high-risk/pause).
 
 \begin{remark}
-The threshold $\Phi = 0.15$ was calibrated empirically: a healthy agent
-with $E = 0.7$, $I = 0.8$, $S = 0.2$ yields $\Phi \approx 0.15$.
-Earlier thresholds ($\Phi = 0.3$) were too aggressive, triggering
-unnecessary caution for well-functioning agents.
+The threshold $\Phi = 0.15$ is calibrated empirically: a healthy
+agent with $E = 0.7$, $I = 0.8$, $S = 0.2$ yields $\Phi \approx
+0.15$.
 \end{remark}
 
 
@@ -767,8 +761,8 @@ updated accordingly.
 \section{Stability}
 \label{sec:contraction}
 
-The EISV dynamics of \Cref{sec:dynamics}, under linear information
-mode (\Cref{sec:saturation}), are globally exponentially stable.
+The EISV dynamics of \Cref{sec:dynamics} are globally
+exponentially stable.
 Specifically, the system is contracting with rate
 $\alpha_c > 0$ under a Riemannian metric
 $M = \operatorname{diag}(0.1, 0.2, 1.0, 0.08)$, with
@@ -825,77 +819,6 @@ step, preserving the deployed contraction certificate until it
 is replaced.
 \end{remark}
 
-
-
-% ═══════════════════════════════════════════════════════════
-\section{I-Channel Saturation Analysis}
-\label{sec:saturation}
-
-\subsection{The Logistic Mode}
-
-The information dynamics of \Cref{sec:dynamics} use a logistic self-regulation term:
-\begin{equation}
-  g_I^{\text{log}}(I) = \gamma_I I(1-I)
-  \label{eq:gi-logistic}
-\end{equation}
-
-This creates two potential equilibria for the $I$ subsystem
-($dI/dt = 0$):
-\begin{equation}
-  I^*_{\pm} = \frac{1}{2} \pm \frac{1}{2}\sqrt{1 - \frac{4A}{\gamma_I}}
-  \label{eq:I-equilibria}
-\end{equation}
-where $A = -kS + \beta_I C(V)$ is the net forcing term.
-
-\begin{proposition}[Saturation Criterion]
-\label{prop:saturation}
-The logistic $I$-dynamics has a boundary saturation pathology when:
-\begin{equation}
-  A > \frac{\gamma_I}{4}
-  \label{eq:saturation-criterion}
-\end{equation}
-In this regime, $I \to 1$ monotonically (high attractor absorbs all
-trajectories), and the system loses its ability to distinguish
-integrity levels. The saturation margin is:
-\begin{equation}
-  m_{\text{sat}} = 1 - \frac{4A}{\gamma_I}
-  \label{eq:saturation-margin}
-\end{equation}
-$m_{\text{sat}} > 0$ indicates safe operation;
-$m_{\text{sat}} \leq 0$ indicates saturation.
-\end{proposition}
-
-\subsection{The Linear Correction}
-\label{sec:linear-correction}
-
-To prevent boundary saturation, we offer an alternative:
-\begin{equation}
-  g_I^{\text{lin}}(I) = \gamma_I I
-  \label{eq:gi-linear}
-\end{equation}
-
-This yields a unique equilibrium at:
-\begin{equation}
-  I^* = \frac{-kS + \beta_I C(V)}{\gamma_I}
-  \label{eq:I-star-linear}
-\end{equation}
-which is always in $(0,1)$ when $\gamma_I >$ max forcing.
-
-\begin{remark}[Mode Selection]
-The production system supports both modes via configuration. The
-linear mode with $\gamma_I = 0.169$ was tuned to match the logistic
-mode's equilibrium at $I^* \approx 0.80$ while eliminating boundary
-risk. We recommend the linear mode for production deployments.
-\end{remark}
-
-\subsection{Contraction Implications}
-
-Under the linear mode, the Jacobian entry $J_{22} = -\gamma_I$ is
-constant, simplifying the contraction analysis. Under the logistic
-mode, $J_{22} = -\gamma_I(1 - 2I)$, which changes sign at $I = 0.5$
-and approaches zero at the boundaries $I \in \{0, 1\}$---precisely
-where contraction is most needed. This provides a principled argument
-for the linear correction beyond the saturation pathology alone.
 
 
 % ═══════════════════════════════════════════════════════════
@@ -1013,18 +936,15 @@ The adaptive governor produces a binary verdict:
 \end{equation}
 where $R$ is the risk score derived from $\Phi$ (\Cref{eq:phi}).
 
-\begin{remark}[Two-Tier vs.\ Three-Tier Governance]
-An earlier design used three tiers: approve/revise/reject. We
-abandoned the three-tier form on design grounds rather than from a
-measured oscillation study: a \texttt{revise} verdict carries no
-information about \emph{what} to revise, which makes it operationally
-indistinguishable from \texttt{proceed} for agents whose next action is
-unchanged by the verdict's content. The two-tier design replaces the
-ambiguous middle state with a binary contract (proceed / pause) and
-delegates the nuance that \texttt{revise} attempted to encode to the
-PID governor's continuous threshold adaptation, which does carry a
-derivative signal. A controlled oscillation-rate comparison between
-the two- and three-tier forms remains future work.
+\begin{remark}[Why two tiers]
+The binary contract is paired with the PID governor's continuous
+threshold adaptation: the discrete verdict fires or it does not,
+while the governor carries the nuance through a derivative signal
+on $\tau$ and $\beta$. A middle \texttt{revise} tier would be
+operationally indistinguishable from \texttt{proceed} for agents
+whose next action is unchanged by the verdict's content, so the
+nuance is better absorbed by the governor than by an additional
+verdict level.
 \end{remark}
 
 \subsection{Ephemeral Agents and the Sliding Window}
@@ -1062,17 +982,14 @@ work.
 
 \subsection{Motivation and Scope}
 
-Earlier UNITARES formulations described the quantity below as
-``ethical drift.'' The label overstates what is actually
-instrumented. The four signals defined in \Cref{def:drift} are
-behavioral (decision consistency, coherence departure) and
-epistemic (calibration gap, complexity self-estimation error);
-none of them measure the agent's values in a normative sense.
-A faithful rename is therefore \emph{behavioral--epistemic drift}.
-We retain the symbol $\deta$ and the macro name for continuity
-with the deployed code and prior publications. Two adjacent axes
-that the present vector does \emph{not} instrument, but which a
-complete treatment would include as distinct channels, are:
+The behavioral--epistemic drift vector instruments four signals:
+decision consistency and coherence departure (behavioral),
+calibration gap and complexity self-estimation error (epistemic).
+None of them measure the agent's values in a normative sense; the
+vector is a deliberately behavioral--epistemic quantity. Two
+adjacent axes that a complete treatment would include as distinct
+channels, but which the present vector does \emph{not}
+instrument, are:
 
 \begin{description}
 \item[Emotional / affective drift.] For embodied agents with
@@ -1094,17 +1011,15 @@ out of scope for the present paper. The remainder of this section
 grounds the behavioral--epistemic vector in four measurable signals,
 each bounded in $[0,1]$.
 
-\begin{remark}[Pre-grounding form]
-The four signals defined below carry over from earlier formulations
-unchanged. Under the information-theoretic frame of
-\Cref{sec:grounding}, two of them have natural information-theoretic
-re-derivations: $\eta_{\text{cal}}$ (calibration deviation) is a
-miscalibration KL divergence between predicted and empirical outcome
+\begin{remark}[Information-theoretic re-derivations]
+Under the information-theoretic frame of \Cref{sec:grounding},
+two of the four signals have natural re-derivations:
+$\eta_{\text{cal}}$ (calibration deviation) is a miscalibration
+KL divergence between predicted and empirical outcome
 distributions, and $\eta_{\text{coh}}$ (coherence deviation) is a
 KL divergence from the class-conditional baseline distribution of
-\Cref{sec:grounding}. We retain the distance-based forms here for
-continuity with the deployed system; the KL re-derivations
-constitute additional grounding work for subsequent versions.
+\Cref{sec:grounding}. We use the distance-based forms here;
+the KL re-derivations are deferred to subsequent work.
 \end{remark}
 
 \begin{definition}[Behavioral--Epistemic Drift Vector]
@@ -1682,39 +1597,7 @@ consistent with small $|V|$ and the honest-reporting principle.}
 \label{fig:coherence-hist}
 \end{figure}
 
-\subsection{Saturation and Regime Diagnostics}
-
-Of 903 agents, 19 have $I \geq 0.999$ (boundary saturation). All 19
-are in the CONVERGENCE regime with relatively few updates, indicating
-that saturation occurs in agents that receive strong positive forcing
-(high coherence, low entropy) without sufficient self-regulation.
-
-For the 75 active agents, the saturation margin under logistic mode
-is:
-\begin{align*}
-  m_{\text{sat}} &= 1 - \frac{4(-kS^* + \beta_I C^*)}{\gamma_I} \\
-  &= 1 - \frac{4(-0.10 \cdot 0.082 + 0.30 \cdot 0.483)}{0.25} \\
-  &= 1 - \tfrac{0.547}{0.25} = -1.19
-\end{align*}
-This \emph{negative} margin confirms the saturation criterion
-(\Cref{prop:saturation}): under the logistic mode with production
-parameters, the forcing term exceeds $\gamma_I/4$, and only the
-clamping at $I = 1$ prevents unbounded growth
-(\Cref{fig:saturation-margin}). The linear mode eliminates this
-issue by construction.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{fig4_saturation_margin}
-\caption{Saturation margin $m_{\mathrm{sat}} = 1 - 4A/\gamma_I$ by
-regime. All agents fall below zero (horizontal line), confirming that
-under logistic damping, every agent's forcing exceeds the maximum
-logistic restoring force. The linear correction
-(\Cref{sec:linear-correction}) removes this boundary pathology.}
-\label{fig:saturation-margin}
-\end{figure}
-
-\subsubsection*{Regime Distribution}
+\subsection{Dynamical Regimes}
 
 Agents distribute across three dynamical regimes based on EISV
 trajectory trends:
@@ -2151,10 +2034,10 @@ three practical consequences:
 The system's behavior is most sensitive to four parameters:
 
 \paragraph{Convergence rate $\alpha$.}
-Controls how quickly $E$ tracks $I$. Production uses $\alpha = 0.42$;
-earlier theoretical work used $\alpha = 0.5$. Larger $\alpha$
-increases diagonal dominance in the Jacobian (improving contraction)
-but makes the energy channel less responsive to behavioral--epistemic drift.
+Controls how quickly $E$ tracks $I$. Production uses
+$\alpha = 0.42$. Larger $\alpha$ increases diagonal dominance in
+the Jacobian (improving contraction) but makes the energy channel
+less responsive to behavioral--epistemic drift.
 
 \paragraph{Coherence coupling $\beta_I$.}
 Determines how strongly coherence restores integrity. The theoretical
@@ -2299,10 +2182,9 @@ results are deferred to subsequent work following the
 measurement protocol of \Cref{sec:class-calibration}.
 
 The framework's adaptive governor (\Cref{sec:governor}),
-behavioral--epistemic drift vector (\Cref{sec:ethical-drift}), and multi-agent
-extensions (\Cref{sec:network}) carry over from earlier
-formulations. We kept the $\{E, I, S, V, C\}$ symbols and the
-dynamics; we replaced what they mean and how they are normalized.
+behavioral--epistemic drift vector (\Cref{sec:ethical-drift}),
+and multi-agent extensions (\Cref{sec:network}) form the rest of
+the governance surface alongside these two commitments.
 
 As autonomous AI agents become more prevalent, governance
 frameworks must accommodate the heterogeneity of the populations
@@ -2618,8 +2500,7 @@ rate $e^{-\alpha t}$.
 \subsection*{Jacobian of the EISV System}
 
 Define $J = \partial f / \partial \eisv$. For the governing
-equations \eqref{eq:dE}--\eqref{eq:dV} (using linear $g_I$ mode,
-see \Cref{sec:saturation}):
+equations \eqref{eq:dE}--\eqref{eq:dV}:
 \begin{equation}
 J = \begin{pmatrix}
 -\alpha - \beta_E S & \alpha & -\beta_E E & 0 \\
@@ -2856,13 +2737,56 @@ $\alpha_c > 0$, guaranteeing global exponential
 convergence. \qed
 
 
-\section{Saturation Diagnostics}
+\section{I-Channel Self-Regulation: Linear vs.\ Logistic}
 \label{app:saturation}
 
-The saturation margin $m_{\text{sat}} = 1 - 4A/\gamma_I$ was computed
-for all 75 active agents using their current EISV state. Under the
-logistic mode with production parameters ($\gamma_I = 0.25$,
-$k = 0.10$, $\beta_I = 0.30$):
+\Cref{sec:equations} specifies the linear self-regulation term
+$g_I(I) = \gamma_I I$. This appendix records the logistic
+alternative $g_I^{\log}(I) = \gamma_I I(1-I)$, its saturation
+pathology under production forcing, and the empirical basis for
+choosing the linear form.
+
+\paragraph{Logistic form and saturation criterion.}
+Under the logistic self-regulation, the $I$ subsystem
+($dI/dt = 0$) has two equilibria
+\begin{equation}
+  I^*_{\pm} = \tfrac{1}{2} \pm \tfrac{1}{2}\sqrt{1 - 4A/\gamma_I},
+  \qquad A = -kS + \beta_I C(V).
+  \label{eq:I-equilibria}
+\end{equation}
+
+\begin{proposition}[Saturation criterion]
+\label{prop:saturation}
+The logistic $I$-dynamics has a boundary saturation pathology
+when $A > \gamma_I/4$. In this regime $I \to 1$ monotonically and
+the system loses its ability to distinguish integrity levels. The
+saturation margin
+\begin{equation}
+  m_{\text{sat}} = 1 - 4A/\gamma_I
+  \label{eq:saturation-margin}
+\end{equation}
+is positive in safe operation and non-positive under saturation.
+\end{proposition}
+
+\paragraph{Linear form.}
+The linear self-regulation $g_I^{\text{lin}}(I) = \gamma_I I$
+yields the unique equilibrium
+\begin{equation}
+  I^* = (-kS + \beta_I C(V)) / \gamma_I
+  \label{eq:I-star-linear}
+\end{equation}
+which is always in $(0,1)$ when $\gamma_I$ exceeds the maximum
+forcing. Under the linear form the Jacobian entry
+$J_{22} = -\gamma_I$ is constant; under the logistic form
+$J_{22} = -\gamma_I(1 - 2I)$, which changes sign at $I = 0.5$ and
+approaches zero at the boundaries---precisely where contraction
+is most needed. Production uses the linear form with
+$\gamma_I = 0.169$, giving $I^* \approx 0.80$.
+
+\paragraph{Empirical saturation under the logistic form.}
+The saturation margin was computed for all $75$ active agents
+under the logistic mode with parameters $\gamma_I = 0.25$,
+$k = 0.10$, $\beta_I = 0.30$:
 
 \begin{center}
 \small
@@ -2879,23 +2803,12 @@ All active ($n=75$) & $-1.23$ & 100\% \\
 \end{tabular}
 \end{center}
 
-All active agents operate with negative saturation margin under the
-logistic mode, meaning the forcing term $A = -kS + \beta_I C(V)$
-exceeds $\gamma_I/4 = 0.0625$ for all agents. The system currently
-relies on state clamping at $I = 1$ rather than intrinsic dynamics to
-prevent boundary escape. This motivates the linear correction
-(\Cref{sec:saturation}): under the linear mode with $\gamma_I = 0.169$,
-$I^* = A / \gamma_I \approx 0.80$, which is well within the interior
-of $[0,1]$.
-
-\textbf{Data provenance caveat.} These statistics reflect agents
-accumulated since initial deployment (December 2025), during which
-dynamics parameters, governor thresholds, and the I-channel mode itself
-were iteratively refined. The 19 boundary-saturated agents predate the
-linear mode rollout. We report the snapshot as-is rather than filtering
-to a ``clean'' parameter regime, since the saturation criterion
-(\Cref{prop:saturation}) depends only on the relationship $A > \gamma_I/4$,
-which holds regardless of the agent's configuration history.
+Every active agent has a negative saturation margin under the
+logistic form: the forcing term $A$ exceeds $\gamma_I/4 = 0.0625$
+across the fleet. The saturation criterion
+(\Cref{prop:saturation}) holds regardless of the agent's
+configuration history, since it depends only on the relationship
+$A > \gamma_I/4$.
 
 
 \section{Boundary Clamping and Non-Smoothness}
@@ -2920,7 +2833,7 @@ constraint set is convex~\cite{lohmiller1998contraction}, which
 $\mathcal{X}$ (a hyperrectangle) is.
 
 \paragraph{Pre-emptive tightening.}
-The saturation diagnostic of \Cref{sec:saturation} monitors the
+The saturation diagnostic of \Cref{app:saturation} monitors the
 I-channel's distance from the boundary. When $m_{\text{sat}} < 0.1$
 the system logs a warning and the adaptive governor tightens
 thresholds pre-emptively, preventing boundary contact rather than
