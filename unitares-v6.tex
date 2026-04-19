@@ -514,19 +514,19 @@ operational form is
 \end{equation}
 with $C_{\max} = 1$ and $C_1 = 1.0$ (production values). This
 maps $V \in \R \to [0, C_{\max}]$ with the steepest sensitivity
-at $V = 0$. The dual presentation reflects the dual-compute
-migration of \Cref{sec:migration}: the grounded form is reported
-in canonical payload slots; the operational form remains the
-quantity the dynamics consume until the Phase~3 swap migrates the
-ODE coefficients onto the grounded coherence.
+at $V = 0$. The dynamics consume the operational form; the
+grounded form is reported in canonical payload slots.
+\Cref{sec:migration} documents the retirement sequence for the
+operational form.
 
 \begin{remark}[Operating Range]
 \label{rem:operating-range}
 In production, the damping term $\delta V$ in \eqref{eq:dV} constrains
-$V$ to approximately $[-0.1, 0.1]$, yielding $C(V) \approx 0.49$. This
-narrow operating range is not a deficiency but an honest signal: the
-system operates conservatively with integrity consistently exceeding
-energy ($I > E$).
+$V$ to approximately $[-0.1, 0.1]$, yielding $C(V) \approx 0.49$; the
+empirical distribution is reported in \Cref{sec:experiments}. The
+narrow range near the coherence-function midpoint is the operational
+consequence of the damping analysis rather than a deficiency of the
+signal.
 \end{remark}
 
 \subsection{Adaptive Entropy Coupling}
@@ -1375,154 +1375,6 @@ design commitment that survives any specific fleet composition.
 
 
 % ═══════════════════════════════════════════════════════════
-\section{Re-Grounding a Deployed Framework}
-\label{sec:migration}
-
-Re-grounding the EISV state vector raised an engineering problem
-distinct from the mathematical one. The framework was already in
-production: governance verdicts were being issued, dashboards were
-displaying live metrics, calibration data was accumulating, and
-external clients had pinned their integrations against the
-existing payload schema. We needed to introduce computable grounded
-quantities without invalidating any of this. This section documents
-the mechanism that enabled the migration; we believe it
-generalizes to any deployed agent framework whose semantics need
-to shift while service continues.
-
-\subsection{Three-Phase Dual-Compute}
-
-The migration runs in three discrete phases:
-
-\begin{description}
-\item[Phase 1: Dual-compute.]
-  Every check-in computes both the grounded value and the legacy
-  value. Grounded values land in canonical
-  $\{E, I, S, C\}$ slots; legacy values are preserved in
-  $\{E_{\text{legacy}}, I_{\text{legacy}}, S_{\text{legacy}},
-  C_{\text{legacy}}\}$. Source annotations on each grounded
-  coordinate (\texttt{e\_source}, \texttt{i\_source},
-  \texttt{s\_source}, \texttt{coherence\_source}) identify which
-  computation tier produced each value (logprob / multisample /
-  heuristic / resource / manifold / KL / FEP).
-\item[Phase 2: Calibration.]
-  Scale constants and class-conditional healthy operating points
-  are measured against a reference corpus of healthy production
-  agent-turns, partitioned by the identity tags of
-  \Cref{sec:class-structure}. Divergence between grounded and
-  legacy values is characterized; the empirical appendix reports
-  the result.
-\item[Phase 3: Migration.]
-  Governance gating (verdicts, basin classification, risk
-  thresholds) switches from legacy to grounded values. The
-  legacy fields remain readable for one minor version as a
-  comparison surface, then are dropped.
-\end{description}
-
-The contribution of this section is not the three-phase shape
-itself---which is standard for any deprecated-API migration---but
-the mechanism by which Phase 1 preserves governance behavior while
-exposing grounded values to downstream consumers.
-
-\subsection{Pipeline-Ordering as a Behavior-Preservation Mechanism}
-\label{sec:pipeline-ordering}
-
-A naive reading of Phase 1 is that grounded values must equal
-legacy values for behavior to be preserved. This is false in
-general: the grounded coherence $C$ under \Cref{eq:C-manifold}
-differs numerically from the legacy
-$\tanh$-based coherence even when computed on identical EISV
-inputs, because the formulas are different. Requiring numerical
-equality would defeat the point of grounding.
-
-The mechanism we use instead is pipeline-ordering. The server's
-\texttt{process\_agent\_update} request pipeline runs in two
-phases: a \emph{phases} phase that computes governance state and
-issues the verdict, and an \emph{enrichments} phase that augments
-the response payload with secondary signals. The enrichments
-phase is registered as an ordered list; entries with lower order
-run first. We register the grounding computation as an enrichment
-at order $75$, downstream of every entry that contributes to the
-verdict and basin classification but upstream of presentation
-enrichments such as the human-readable summary and the broadcaster
-event.
-
-The result: by the time the grounding enrichment runs, the verdict
-has already been computed---using the legacy values produced by
-the phases phase. The grounding enrichment then swaps grounded
-values into the canonical
-$\{E, I, S, C\}$ slots, copying the originals into
-$\{E_{\text{legacy}}, \dots\}$. The response payload carries
-grounded values, but the governance decision was made on legacy.
-No gating code is touched; no consumer reading
-$\{E, I, S, C\}$ sees a missing field; no decision changes during
-Phase 1.
-
-\begin{remark}[Idempotency]
-The enrichment checks for the presence of $E_{\text{legacy}}$
-before swapping; on a second invocation against the same context
-it returns immediately. This guards against double-application in
-testing and during pipeline replay.
-\end{remark}
-
-\subsection{What Doesn't Get Grounded in Phase 1}
-
-The void coordinate $V$ is not dual-computed. As discussed in
-\Cref{sec:grounding}, $V$ is structurally an accumulator; its
-grounded reinterpretation as accumulated free-energy debt
-\Cref{eq:V-grounded} is a relabeling of an existing quantity, not
-a new computation. No source annotation, no $V_{\text{legacy}}$
-twin. The internal naming
-($\texttt{void} \to \texttt{free\_energy\_debt}$ in subsequent
-revisions) is a cosmetic change tracked separately from the
-dual-compute migration.
-
-Tier-1 (logprob-based) and tier-2 (multi-sample) computations are
-present in the codebase as interface stubs that raise
-\texttt{NotImplementedError}; the dispatcher catches and falls
-through to tier-3 (heuristic / resource / manifold). This keeps
-the dispatcher surface stable while the inference-layer
-instrumentation needed to populate logprobs lands separately,
-typically as plugin work outside the governance server.
-
-\subsection{Generalization}
-
-The pipeline-ordering mechanism is reusable for any deployed
-agent framework facing a semantic-coordinate change while service
-continues. The required structure is:
-\begin{enumerate}
-  \item A request pipeline with explicit ordering between
-    decision-producing stages and presentation-producing stages.
-  \item A canonical payload slot for the coordinate being
-    re-grounded.
-  \item Identity (or session) keying that allows audit
-    consumers to tag rows by the migration phase active when the
-    row was produced.
-\end{enumerate}
-Frameworks that conflate decision and presentation into a single
-non-ordered handler cannot apply this mechanism directly; they
-must first separate the two concerns. We argue this separation is
-worth doing independently of any migration: it makes governance
-decisions auditable and presentation choices revisable in
-isolation.
-
-As a concrete second example, consider an RLHF-governed deployment
-whose gating signal is a reward-model score $r(x, y)$ and whose
-operators wish to migrate to a calibrated reward $\tilde{r}(x, y)$
-derived from a revised preference model without changing refusal or
-escalation behavior during the transition. The pipeline structure
-maps directly: the \emph{phases} stage computes the legacy $r$ and
-issues the gate; the \emph{enrichments} stage computes $\tilde{r}$,
-writes it to a canonical \texttt{reward} field, and copies $r$ to
-\texttt{reward\_legacy}. Downstream dashboards and calibration
-pipelines see $\tilde{r}$; refusal logic continues to read $r$. The
-audit log tags each row with the active migration phase, so a
-divergence study over a held-out corpus can characterize where
-$\tilde{r}$ and $r$ would disagree before any Phase 3 cutover. The
-mechanism is identical; only the coordinate being re-grounded
-changes.
-
-
-% ═══════════════════════════════════════════════════════════
 \section{Stochastic Extensions}
 \label{sec:stochastic}
 
@@ -2134,6 +1986,129 @@ our empirical claims:
   acknowledge that even this filtered set spans multiple configuration
   epochs.
 \end{enumerate}
+
+
+% ═══════════════════════════════════════════════════════════
+\section{Re-Grounding a Deployed Framework}
+\label{sec:migration}
+
+The counterfactual of \Cref{sec:verdict-counterfactual} was
+computable because the framework was instrumented during a live
+migration: grounded and legacy coherence were computed on every
+production check-in over the measurement window, and governance
+gating continued to read the legacy values so no verdict changed
+during measurement. This section documents the mechanism that
+made the comparison possible. We believe it generalizes to any
+deployed agent framework whose coordinate semantics need to shift
+while service continues.
+
+\subsection{Three-Phase Dual-Compute}
+
+The migration runs in three discrete phases:
+
+\begin{description}
+\item[Phase 1: Dual-compute.]
+  Every check-in computes both the grounded value and the legacy
+  value. Grounded values land in canonical
+  $\{E, I, S, C\}$ slots; legacy values are preserved in
+  $\{E_{\text{legacy}}, I_{\text{legacy}}, S_{\text{legacy}},
+  C_{\text{legacy}}\}$. Source annotations on each grounded
+  coordinate (\texttt{e\_source}, \texttt{i\_source},
+  \texttt{s\_source}, \texttt{coherence\_source}) identify which
+  computation tier produced each value (logprob / multisample /
+  heuristic / resource / manifold / KL / FEP).
+\item[Phase 2: Calibration.]
+  Scale constants and class-conditional healthy operating points
+  are measured against a reference corpus of healthy production
+  agent-turns, partitioned by the identity tags of
+  \Cref{sec:class-structure}. Divergence between grounded and
+  legacy values is characterized; the counterfactual of
+  \Cref{sec:verdict-counterfactual} is the first such
+  characterization.
+\item[Phase 3: Migration.]
+  Governance gating (verdicts, basin classification, risk
+  thresholds) switches from legacy to grounded values. The
+  legacy fields remain readable for one minor version as a
+  comparison surface, then are dropped.
+\end{description}
+
+The contribution of this section is not the three-phase shape
+itself---which is standard for any deprecated-API migration---but
+the mechanism by which Phase 1 preserves governance behavior while
+exposing grounded values to downstream consumers.
+
+\subsection{Pipeline-Ordering as a Behavior-Preservation Mechanism}
+\label{sec:pipeline-ordering}
+
+A naive reading of Phase 1 is that grounded values must equal
+legacy values for behavior to be preserved. This is false in
+general: the grounded coherence $C$ under \Cref{eq:C-manifold}
+differs numerically from the legacy
+$\tanh$-based coherence even when computed on identical EISV
+inputs, because the formulas are different. Requiring numerical
+equality would defeat the point of grounding.
+
+The mechanism we use instead is pipeline-ordering. The server's
+\texttt{process\_agent\_update} request pipeline runs in two
+phases: a \emph{phases} phase that computes governance state and
+issues the verdict, and an \emph{enrichments} phase that augments
+the response payload with secondary signals. The enrichments
+phase is registered as an ordered list; entries with lower order
+run first. We register the grounding computation as an enrichment
+at order $75$, downstream of every entry that contributes to the
+verdict and basin classification but upstream of presentation
+enrichments such as the human-readable summary and the broadcaster
+event.
+
+The result: by the time the grounding enrichment runs, the verdict
+has already been computed---using the legacy values produced by
+the phases phase. The grounding enrichment then swaps grounded
+values into the canonical
+$\{E, I, S, C\}$ slots, copying the originals into
+$\{E_{\text{legacy}}, \dots\}$. The response payload carries
+grounded values, but the governance decision was made on legacy.
+No gating code is touched; no consumer reading
+$\{E, I, S, C\}$ sees a missing field; no decision changes during
+Phase 1.
+
+\begin{remark}[Scope of Phase 1]
+$V$ is not dual-computed; its grounded reinterpretation as
+accumulated free-energy debt (\Cref{eq:V-grounded}) is a
+relabeling, not a new computation. Tier-1 (logprob) and tier-2
+(multi-sample) grounding paths are interface stubs that raise
+\texttt{NotImplementedError}, with the dispatcher falling through
+to tier-3; inference-layer instrumentation for tier-1 lands
+separately.
+\end{remark}
+
+\subsection{Generalization}
+
+The pipeline-ordering mechanism is reusable for any deployed
+agent framework facing a semantic-coordinate change while service
+continues. The required structure is: (i) a request pipeline with
+explicit ordering between decision-producing stages and
+presentation-producing stages; (ii) a canonical payload slot for
+the coordinate being re-grounded; (iii) identity (or session)
+keying that allows audit consumers to tag rows by the migration
+phase active when the row was produced.
+Frameworks that conflate decision and presentation into a single
+non-ordered handler must first separate the two concerns---a
+separation worth doing independently of any migration, because it
+makes governance decisions auditable and presentation choices
+revisable in isolation.
+
+As a concrete second example, consider an RLHF-governed deployment
+whose gating signal is a reward-model score $r(x, y)$ and whose
+operators wish to migrate to a calibrated reward $\tilde{r}(x, y)$
+derived from a revised preference model without changing refusal or
+escalation behavior during the transition. The pipeline structure
+maps directly: the \emph{phases} stage computes the legacy $r$ and
+issues the gate; the \emph{enrichments} stage computes $\tilde{r}$,
+writes it to a canonical \texttt{reward} field, and copies $r$ to
+\texttt{reward\_legacy}. Downstream dashboards and calibration
+pipelines see $\tilde{r}$; refusal logic continues to read $r$.
+The mechanism is identical; only the coordinate being re-grounded
+changes.
 
 
 % ═══════════════════════════════════════════════════════════
