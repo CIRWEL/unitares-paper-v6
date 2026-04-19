@@ -249,7 +249,7 @@ degradation rather than binary verdicts after the fact.
 Ravindran~\cite{ravindran2025moral} proposes a Moral Anchor System
 (MAS) that detects value drift using a three-dimensional state vector
 with Bayesian inference and LSTM-based forecasting. While MAS and
-UNITARES share the goal of detecting ethical drift, they differ
+UNITARES share the goal of detecting value-level drift, they differ
 fundamentally: MAS is a statistical detection pipeline that predicts
 drift from observed behavior, whereas UNITARES models drift as a
 dynamical force that couples into the state equations, providing
@@ -264,7 +264,7 @@ conformance to an FSM, UNITARES maintains a continuous four-dimensional
 dynamical state whose evolution itself carries the governance signal.
 Rath~\cite{rath2026agentdrift} independently proposes an Agent
 Stability Index over multi-agent LLM systems as a composite metric;
-UNITARES's ethical drift vector (\Cref{sec:ethical-drift}) couples
+UNITARES's behavioral--epistemic drift vector (\Cref{sec:ethical-drift}) couples
 drift back into the governing equations rather than tracking it as an
 external metric.
 
@@ -284,7 +284,7 @@ coherence function.
 
 \paragraph{Calibration.}
 Confidence calibration has a rich literature in forecasting and ML
-\cite{guo2017calibration,niculescu2005predicting}. Our ethical drift
+\cite{guo2017calibration,niculescu2005predicting}. Our behavioral--epistemic drift
 vector uses calibration deviation as one of four measurable components,
 connecting calibration to governance dynamics.
 
@@ -472,7 +472,7 @@ The dynamics are:
 
 where $g_I(I)$ is the information integrity self-regulation term
 (\Cref{sec:saturation}), $\cv$ is the coherence function
-(\Cref{sec:coherence}), $\norm{\deta}$ is the ethical drift norm
+(\Cref{sec:coherence}), $\norm{\deta}$ is the behavioral--epistemic drift norm
 (\Cref{sec:ethical-drift}), $\mathcal{C} \in [0,1]$ is task
 complexity, and $\xi(t)$ is a noise process with intensity $\sigma$.
 
@@ -484,7 +484,7 @@ confident when its context is more informative; $I$ is degraded
 by entropy $S$ (response-distribution uncertainty) but restored
 by coherence (proximity to the calibrated healthy operating
 point); $S$ relaxes toward its prior under stationary conditions
-($-\mu S$) and is driven up by ethical drift and task complexity;
+($-\mu S$) and is driven up by behavioral--epistemic drift and task complexity;
 $V$ accumulates the $E{-}I$ residual with damping $\delta$, which
 under the grounded interpretation is the exponentially-weighted
 free-energy debt of \Cref{eq:V-grounded}. The arithmetic is
@@ -534,7 +534,7 @@ governance parameter vector $\Theta$ to the dynamics:
   \label{eq:lambda1}
 \end{equation}
 where $\eta_1 \in [0.1, 0.5]$ maps to $\lambda_1 \in [0.05, 0.20]$.
-Higher ethical drift sensitivity increases entropy injection, creating
+Higher drift sensitivity increases entropy injection, creating
 a natural feedback loop: drifting agents become more uncertain, which
 in turn triggers conservative governance decisions.
 
@@ -621,7 +621,7 @@ semantic entropy~\cite{kuhn2023semantic}---draw $k$ responses at
 temperature $T > 0$, group by semantic equivalence, and compute the
 entropy of the equivalence-class distribution as an estimator of
 $H(q)$.
-Tier~3: retain the legacy heuristic (complexity, ethical drift) as a
+Tier~3: retain the legacy heuristic (complexity, behavioral--epistemic drift) as a
 degraded-mode fallback tagged \texttt{s\_source = "heuristic"} so
 downstream consumers know the channel is uncalibrated.
 
@@ -1044,16 +1044,72 @@ derivative signal. A controlled oscillation-rate comparison between
 the two- and three-tier forms remains future work.
 \end{remark}
 
+\subsection{Ephemeral Agents and the Sliding Window}
+\label{sec:cirs-ephemeral}
+
+CIRS~v2 as specified above assumes an agent lives long enough for
+a sliding window of $w$ steps to populate. Phase detection, integral
+accumulation, and threshold decay are all well-defined only once
+$w$ samples exist. Ephemeral classes (\Cref{tab:agent-classes}: parser
+agents with millisecond lifetimes, one-shot tool invocations) cannot
+satisfy this precondition by construction---the entire agent
+trajectory is a single step. For these classes the per-agent PID
+controller degenerates.
+
+The deployed behavior is a class-level rather than per-agent
+policy: an ephemeral agent inherits $(\tau, \beta)$ directly from
+its class's stationary reference points $(r_\tau^{(p)},
+r_\beta^{(p)})$ with $p = \text{integration}$ (the stricter of the
+two phases, chosen conservatively because no phase signal is
+available), bypassing the PID loop entirely. Neighbor-pressure
+aggregation (\Cref{eq:neighbor}) still applies across the
+ephemeral-class cohort, which recovers some of the class-wide
+adaptation the per-agent loop would have provided for longer-lived
+agents. The cost is that ephemeral classes do not benefit from
+per-agent threshold learning; the benefit is that a 5~ms parser is
+not blocked waiting for a 20-step window to populate. A principled
+treatment of sub-window-lifetime agents---possibly by pooling the
+PID state across a class cohort rather than per-agent---is future
+work.
+
 
 % ═══════════════════════════════════════════════════════════
-\section{Ethical Drift Vector}
+\section{Behavioral--Epistemic Drift Vector}
 \label{sec:ethical-drift}
 
-\subsection{Motivation}
+\subsection{Motivation and Scope}
 
-``Ethical drift'' in prior work has been an abstract concept---the
-idea that an agent might gradually deviate from its intended values.
-We ground this in four measurable signals, each bounded in $[0,1]$.
+Earlier UNITARES formulations described the quantity below as
+``ethical drift.'' The label overstates what is actually
+instrumented. The four signals defined in \Cref{def:drift} are
+behavioral (decision consistency, coherence departure) and
+epistemic (calibration gap, complexity self-estimation error);
+none of them measure the agent's values in a normative sense.
+A faithful rename is therefore \emph{behavioral--epistemic drift}.
+We retain the symbol $\deta$ and the macro name for continuity
+with the deployed code and prior publications. Two adjacent axes
+that the present vector does \emph{not} instrument, but which a
+complete treatment would include as distinct channels, are:
+
+\begin{description}
+\item[Emotional / affective drift.] For embodied agents with
+  sensor-driven state (Lumen in the production fleet), proxies
+  such as prosody, expression, or heart-rate-variability deltas
+  would populate a $\deta^{\text{aff}}$ channel. This is
+  instrumentable but not currently wired into the governance
+  server.
+\item[Ethical / value drift.] Deviation from a declared value
+  specification (constitutional statements, stated policies,
+  human preferences) would populate a $\deta^{\text{val}}$
+  channel. This is genuinely normative and would require a
+  reference specification that UNITARES does not presently
+  maintain.
+\end{description}
+
+Both are natural extensions to the vector defined below; both are
+out of scope for the present paper. The remainder of this section
+grounds the behavioral--epistemic vector in four measurable signals,
+each bounded in $[0,1]$.
 
 \begin{remark}[Pre-grounding form]
 The four signals defined below carry over from earlier formulations
@@ -1068,7 +1124,7 @@ continuity with the deployed system; the KL re-derivations
 constitute additional grounding work for subsequent versions.
 \end{remark}
 
-\begin{definition}[Ethical Drift Vector]
+\begin{definition}[Behavioral--Epistemic Drift Vector]
 \label{def:drift}
 \begin{equation}
   \deta = \begin{pmatrix}
@@ -1126,9 +1182,10 @@ The drift norm $\norm{\deta}$ enters the dynamics at two points:
   the governance verdict).
 \end{enumerate}
 
-The net effect is that ethical drift creates a governance response:
-increased uncertainty triggers conservative decisions, while the energy
-spike draws attention to the drifting agent.
+The net effect is that behavioral--epistemic drift creates a
+governance response: increased uncertainty triggers conservative
+decisions, while the energy spike draws attention to the drifting
+agent.
 
 \begin{remark}[Energy Spike Containment]
 The $+\gamma_E\norm{\deta}^2$ term in \eqref{eq:dE} creates a
@@ -1282,6 +1339,30 @@ differ in label may share scale constants if the calibration data
 shows their healthy envelopes are statistically indistinguishable;
 subsequent work will report which tag-grouped classes met that
 condition in the production corpus.
+
+\begin{remark}[Cold-start homogenization: a bootstrapping trade-off, not a steady-state property]
+\label{rem:cold-start}
+The fallback-to-$\Sigma(c_{\text{default}})$ behavior during
+the first $N_{\min}$ turns of a new class's existence is, formally,
+the homogenization failure mode of \Cref{sec:heterogeneity}
+applied to that single class: the class is being governed against
+a fleet-wide envelope while its own is still being measured. We
+do not claim this is costless. We do claim it is a bounded-duration
+bootstrapping choice rather than a steady-state commitment:
+(i)~the provenance tag $\rho = \text{placeholder}$ makes the
+regime explicit in every check-in payload; (ii)~once the class
+has accumulated $N_{\min}$ healthy turns, the measurement pipeline
+transitions the provenance to \texttt{measured} and the class
+exits the homogenization regime; (iii)~operators deploying a new
+class with known-different tempo or modality are encouraged to
+hand-author an initial $\Sigma(c)$ with provenance
+\texttt{derived} rather than inherit defaults, and the framework
+exposes this as a supported entry path. The tension the critic
+identifies is real: a class in its cold-start window is \emph{not}
+enjoying the benefits of class-conditional governance. The
+framework's response is to make that state observable rather than
+to paper over it.
+\end{remark}
 
 \subsection{What This Buys}
 
@@ -1468,12 +1549,7 @@ changes.
 \label{sec:stochastic}
 
 In production, the dynamics are subject to stochastic perturbations
-from unpredictable task inputs. An alternative Fokker--Planck framing
-of LLM-severity drift as a critical process appears
-in~\cite{carson2025stochastic}; we retain the SDE framing here because
-it composes directly with the contraction analysis of
-\Cref{sec:contraction} via Pham et al.~\cite{pham2009stochastic}. We
-model this as an It\^{o} SDE:
+from unpredictable task inputs. We model this as an It\^{o} SDE:
 \begin{equation}
   d\eisv = f(\eisv, t)\,dt + G(\eisv, t)\,dW_t
   \label{eq:sde}
@@ -1531,6 +1607,52 @@ excursions ($\sim 0.1$--$0.3$), confirming that stochastic noise does
 not compromise governance decisions. The result follows directly from
 Pham et~al.~\cite{pham2009stochastic}.
 \end{remark}
+
+\subsection{Beyond Mean-Square Contraction: What a Fokker--Planck Treatment Would Add}
+\label{sec:fp-gap}
+
+The mean-square bound of \Cref{thm:stochastic} is a worst-case
+contraction statement. It does not produce a verdict-level
+false-alarm rate. The sharper operational question---\emph{given
+an agent in the healthy regime, what is the probability that
+stochastic excursions cross the governance threshold
+$\Phi < 0$ and trigger a spurious pause verdict?}---requires the
+stationary distribution of the SDE.
+
+The Fokker--Planck equation for $p(\eisv, t)$ under
+\Cref{eq:sde} is
+\[
+  \partial_t p = -\nabla \cdot (f\,p)
+  + \tfrac{1}{2}\sum_{i,j} \partial_i \partial_j(D_{ij}\,p),
+  \qquad D = G G^\top.
+\]
+With the production diffusion $G = \operatorname{diag}(0,0,\sigma,0)$,
+the noise is injected only on the $S$ channel, so $D$ has a single
+non-zero entry $D_{SS} = \sigma^2$. The stationary distribution
+$p_{\ast}(\eisv) = \lim_{t \to \infty} p(\eisv, t)$---once
+derived---would enable direct computation of
+\[
+  P_{\text{FA}}
+  = \int_{\{\eisv : \Phi(\eisv) < 0\}} p_{\ast}(\eisv)\, d\eisv,
+\]
+the false-alarm rate at the \texttt{pause} boundary for an agent
+whose deterministic trajectory sits in the healthy basin. Related
+FP frameworks for LLM drift~\cite{carson2025stochastic} give
+closed-form first-passage times for one-dimensional severity
+processes.
+
+We do not carry out the 4-D Fokker--Planck derivation here. The
+deterministic contraction analysis shows variance is bounded; the
+empirical verdict-flip counterfactual in \Cref{sec:experiments}
+shows the class-conditional form changes verdicts at the population
+level; a proper $P_{\text{FA}}$ bound requires either an analytical
+FP treatment under a suitable reduction (e.g., marginalizing to
+the $S$ subsystem that actually carries the noise, where the FP
+equation is one-dimensional and tractable) or a numerical
+integration of the SDE trajectory ensemble against the governance
+threshold. Either is substantial enough work to be its own
+paper; we flag it here as the sharpest remaining rigor gap in the
+present treatment.
 
 
 % ═══════════════════════════════════════════════════════════
@@ -2074,7 +2196,7 @@ The system's behavior is most sensitive to four parameters:
 Controls how quickly $E$ tracks $I$. Production uses $\alpha = 0.42$;
 earlier theoretical work used $\alpha = 0.5$. Larger $\alpha$
 increases diagonal dominance in the Jacobian (improving contraction)
-but makes the energy channel less responsive to ethical drift.
+but makes the energy channel less responsive to behavioral--epistemic drift.
 
 \paragraph{Coherence coupling $\beta_I$.}
 Determines how strongly coherence restores integrity. The theoretical
@@ -2099,6 +2221,73 @@ $\tau_V = 1/\delta = 2.5$ update cycles. This confines $V$ to
 $[-0.1, 0.1]$ in production (\Cref{rem:operating-range}). Reducing
 $\delta$ would widen the coherence operating range but slow the
 system's response to $E$-$I$ imbalances.
+
+\subsection{Verdict Sensitivity to the Objective Weights}
+\label{sec:phi-sensitivity}
+
+The scalar governance signal of \Cref{eq:phi} uses default weights
+$w_E = w_I = w_S = w_V = w_\eta = 0.5$. The equal-weight choice is
+a deployment default, not a derived optimum; an honest treatment
+asks how sensitive the verdict surface is to weight perturbations.
+
+At the verdict boundary $\Phi = 0.15$, the partial derivatives
+against each weight are the corresponding state-dependent
+contributions:
+\[
+  \frac{\partial \Phi}{\partial w_E} = E,\;
+  \frac{\partial \Phi}{\partial w_I} = -(1-I),\;
+  \frac{\partial \Phi}{\partial w_S} = -S,\;
+  \frac{\partial \Phi}{\partial w_V} = -\abs{V},\;
+  \frac{\partial \Phi}{\partial w_\eta} = -\norm{\deta}^2.
+\]
+Evaluating at the production fleet-aggregate operating point
+$(E, I, S, V) = (0.77, 0.88, 0.08, -0.03)$ with healthy
+$\norm{\deta}^2 \lesssim 0.01$:
+\begin{center}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Weight} & $\partial\Phi/\partial w_i$ & \textbf{Sign} \\
+\midrule
+$w_E$ & $+0.77$ & promotes proceed \\
+$w_I$ & $-0.12$ & promotes proceed (small, since $I$ is high) \\
+$w_S$ & $-0.08$ & promotes proceed (small, since $S$ is low) \\
+$w_V$ & $-0.03$ & negligible \\
+$w_\eta$ & $\lesssim 0.01$ & negligible \\
+\bottomrule
+\end{tabular}
+\end{center}
+The $w_E$ derivative dominates by an order of magnitude at healthy
+operating points. This is structural rather than incidental: $E$
+sits near $0.77$ in production while the penalty terms are all
+near zero. The objective is therefore most sensitive to the
+energy weight and least sensitive to the void/drift weights
+\emph{in the healthy regime}. The ordering flips at degraded
+states where $S$ rises and $(1-I)$ grows.
+
+\paragraph{Threshold robustness band.}
+Perturbing all five weights uniformly by $\pm \epsilon$ shifts
+$\Phi$ by at most
+$\epsilon \cdot (E + (1-I) + S + \abs{V} + \norm{\deta}^2)
+\approx 1.01\epsilon$ in magnitude at the production operating
+point. The verdict boundary $\Phi = 0.15$ is therefore robust to
+uniform weight perturbations up to roughly $\pm 15\%$ before a
+single-agent verdict at the boundary would flip. Non-uniform
+perturbations are bounded by the largest single partial
+derivative; a $+50\%$ perturbation to $w_E$ alone would shift
+$\Phi$ by $+0.19$ at the operating point, which is well above
+$0.15$ and would change boundary-case verdicts.
+
+\paragraph{What this analysis does not do.}
+The derivatives above characterize local sensitivity at a single
+operating point; they do not establish how many verdicts would
+flip under a specified weight perturbation, nor whether equal
+weights are in any sense optimal. That result requires an
+empirical counterfactual: rerun the audit log with perturbed
+weights and count verdict flips, analogous to the grounded-form
+counterfactual reported in \Cref{sec:experiments}. We defer the
+weight-perturbation verdict-flip study to subsequent work with
+the same infrastructure.
 
 \subsection{Boundary Clamping and Non-Smoothness}
 
@@ -2134,7 +2323,7 @@ relying on clamping to maintain invariance.
   loop whose gain depends on the operating point (maximum at
   $V = 0$, vanishing at $|V| \gg 0$). The contraction analysis
   uses $C'_{\max}$ as a worst-case bound, which is conservative.
-\item The ethical drift vector's four components are currently
+\item The behavioral--epistemic drift vector's four components are currently
   equally weighted; adaptive weighting based on domain context
   is future work.
 \item The multi-agent network analysis assumes fixed topology;
@@ -2226,7 +2415,7 @@ results are deferred to subsequent work following the
 measurement protocol of \Cref{sec:class-calibration}.
 
 The framework's adaptive governor (\Cref{sec:governor}), ethical
-drift vector (\Cref{sec:ethical-drift}), and multi-agent
+behavioral--epistemic drift vector (\Cref{sec:ethical-drift}), and multi-agent
 extensions (\Cref{sec:network}) carry over from earlier
 formulations. The honest accounting of what changed and what was
 preserved appears in
@@ -2462,7 +2651,7 @@ $\beta$ floor/ceil & $\beta$ & 0.20/0.70 & Hard bounds \\
 \begin{table}[htbp]
 \centering
 \footnotesize
-\caption{Ethical Drift Vector Parameters}
+\caption{Behavioral--Epistemic Drift Vector Parameters}
 \label{tab:drift}
 \begin{tabular}{@{}llrl@{}}
 \toprule
