@@ -970,18 +970,6 @@ decay toward defaults at rate $\lambda_d = 0.01$ per update:
   \label{eq:decay}
 \end{equation}
 
-\subsection{Multi-Agent Coordination}
-
-Neighbor pressure tightens thresholds when nearby agents are
-experiencing difficulty:
-\begin{equation}
-  \Delta\tau_{\text{nb}} = \frac{\alpha_n}{|\mathcal{N}|}
-  \sum_{j \in \mathcal{N}} \mathbb{1}[C_j < \tau_j]
-  \label{eq:neighbor}
-\end{equation}
-where $\mathcal{N}$ is the set of agents with similar coherence
-profiles and $\alpha_n$ is the neighbor coupling strength.
-
 \subsection{Governance Decision}
 
 The adaptive governor produces a binary verdict:
@@ -1022,16 +1010,12 @@ policy: an ephemeral agent inherits $(\tau, \beta)$ directly from
 its class's stationary reference points $(r_\tau^{(p)},
 r_\beta^{(p)})$ with $p = \text{integration}$ (the stricter of the
 two phases, chosen conservatively because no phase signal is
-available), bypassing the PID loop entirely. Neighbor-pressure
-aggregation (\Cref{eq:neighbor}) still applies across the
-ephemeral-class cohort, which recovers some of the class-wide
-adaptation the per-agent loop would have provided for longer-lived
-agents. The cost is that ephemeral classes do not benefit from
-per-agent threshold learning; the benefit is that a 5~ms parser is
-not blocked waiting for a 20-step window to populate. A principled
-treatment of sub-window-lifetime agents---possibly by pooling the
-PID state across a class cohort rather than per-agent---is future
-work.
+available), bypassing the PID loop entirely. The cost is that
+ephemeral classes do not benefit from per-agent threshold learning;
+the benefit is that a 5~ms parser is not blocked waiting for a
+20-step window to populate. A principled treatment of
+sub-window-lifetime agents---possibly by pooling the PID state
+across a class cohort rather than per-agent---is future work.
 
 
 % ═══════════════════════════════════════════════════════════
@@ -1438,9 +1422,14 @@ times for one-dimensional severity processes.
 \section{Multi-Agent Network}
 \label{sec:network}
 
-When multiple agents operate simultaneously, their governance states
-are coupled through shared information and the neighbor pressure
-mechanism of CIRS~v2.
+When multiple agents operate simultaneously, their governance
+states can be coupled through shared information. The deployed
+system does not implement inter-agent state coupling---each agent's
+EISV dynamics evolve independently---and the analysis below
+therefore describes the theoretical behavior of a coupled
+extension, not the current production mechanism. The synchronization
+result of \Cref{thm:network} is used elsewhere in the paper only as
+a within-class qualification on homogenization claims.
 
 \subsection{Network Topology}
 
