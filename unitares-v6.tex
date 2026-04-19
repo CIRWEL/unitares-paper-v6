@@ -83,11 +83,14 @@ the reformulation and established by contraction analysis
 
 We illustrate the framework with a production deployment snapshot from
 February 20, 2026, covering 903 registered agents and 75 active agents.
-These results should be read as partial deployment evidence for the
-framework and migration strategy, not as full empirical validation of
-the class-conditional grounding. Per-class calibration results and
-higher-tier estimators (logprob and multi-sample) are deferred to
-subsequent work.
+A verdict counterfactual on a 30-day production slice
+($N = 13{,}310$) shows that $28.9\%$ of basin assignments would flip
+under class-conditional grounded coherence, with flip rates ranging
+$15$--$33\%$ per class and a strong directional bias into the
+\texttt{low} basin---direct empirical support for the
+homogenization-failure-mode argument. Per-class calibration of the
+remaining scale constants and higher-tier estimators (logprob and
+multi-sample) are deferred to subsequent work.
 \end{abstract}
 
 \textbf{Keywords:} autonomous governance, information theory,
@@ -109,8 +112,7 @@ guarantees.
 We argue that governance should be \emph{intrinsic}---a continuous
 dynamical process that shapes agent behavior from within, much as
 homeostatic regulation governs biological organisms. This paper
-presents UNITARES (\textbf{Uni}fied \textbf{T}hermodynamic
-\textbf{A}daptive \textbf{Re}gulation \textbf{S}ystem), a framework
+presents UNITARES, a framework
 in which each agent carries a four-dimensional state
 $\eisv = (E, I, S, V)^\top$ whose evolution is governed by coupled
 differential equations. The state provides a continuous,
@@ -161,12 +163,16 @@ This paper makes five contributions:
   semantic re-grounding can occur without changing live governance
   behavior during migration.
 
-\item \textbf{Partial deployment evidence}
+\item \textbf{Production deployment snapshot and verdict counterfactual}
   (\Cref{sec:experiments}): We report a production snapshot of the
   deployed system to characterize operating regimes, saturation
-  behavior, and observed fleet dynamics. These results are descriptive
-  and migration-oriented; full class-conditional empirical validation is
-  left to subsequent work.
+  behavior, and observed fleet dynamics. We also report a verdict
+  counterfactual on a $13{,}310$-row production slice showing that
+  $28.9\%$ of basin assignments would flip under class-conditional
+  grounded coherence, with the dominant direction of flips
+  (predominantly into the \texttt{low} basin) being empirical
+  support for the homogenization-failure-mode argument of contribution
+  $1$.
 \end{enumerate}
 
 \subsection{Limitations and Scope}
@@ -209,11 +215,17 @@ characterizing model output distributions; calibration analysis
 confidence-outcome alignment. The variational free-energy
 principle~\cite{friston2010free} provides a unifying frame in
 which agent surprise corresponds to free energy and adaptive
-agents minimize expected surprise. UNITARES adapts these
+agents minimize expected surprise; the active-inference
+literature \cite{dacosta2020active,sajid2021active,smith2022step,parr2022active}
+develops the computational machinery for the free-energy quantity
+used in our $E$ coordinate. UNITARES adapts these
 information-theoretic quantities to the governance setting and
 treats the choice of computation tier (logprob, multi-sample,
 heuristic) as a deployment configuration rather than an
-assumption.
+assumption. We use the variational form rather than the
+discrete-state-space active-inference form because the agents
+under governance do not generally expose discrete latent
+state-spaces to the governance layer.
 
 \paragraph{Contraction Theory.}
 Lohmiller and Slotine~\cite{lohmiller1998contraction} established
@@ -782,14 +794,22 @@ frameworks. Class-conditional grounding
 that does.
 
 The grounded reformulation of
-\Cref{sec:grounding} preserves stability. The dynamics
+\Cref{sec:grounding} preserves stability \emph{within each agent
+class}. The dynamics
 $\dot{\eisv} = f(\eisv, t)$ are unchanged; only the meaning of
-the coordinates changes. The contraction certificate of
-\Cref{thm:contraction} therefore carries over without
-modification, and the equilibrium $\eisv^*$ becomes the
-class-conditional healthy operating point of
-\Cref{def:scale-map} in deployments where calibration has been
-performed.
+the coordinates and the values of the scale constants change.
+The contraction certificate of \Cref{thm:contraction} relies on
+fleet-wide bounds (notably $\beta_I C'_{\max}$); under
+class-conditional normalization, the relevant bounds become
+class-indexed, and the contraction analysis carries through
+class-by-class with each class's own $\alpha_c(c)$. The
+equilibrium $\eisv^*$ becomes the class-conditional healthy
+operating point of \Cref{def:scale-map} in deployments where
+calibration has been performed. Cross-class network
+synchronization (\Cref{thm:network}) is therefore a
+within-class property, as already qualified in \Cref{sec:network};
+fleet-wide synchronization across heterogeneous classes is not
+claimed and would not be expected.
 
 
 
@@ -799,7 +819,7 @@ performed.
 
 \subsection{The Logistic Mode}
 
-The original information dynamics uses a logistic self-regulation term:
+The information dynamics of \Cref{sec:dynamics} use a logistic self-regulation term:
 \begin{equation}
   g_I^{\text{log}}(I) = \gamma_I I(1-I)
   \label{eq:gi-logistic}
@@ -1001,7 +1021,20 @@ attempted to capture.
 
 ``Ethical drift'' in prior work has been an abstract concept---the
 idea that an agent might gradually deviate from its intended values.
-We ground this in four measurable signals, each bounded in $[0,1]$:
+We ground this in four measurable signals, each bounded in $[0,1]$.
+
+\begin{remark}[Pre-grounding form]
+The four signals defined below carry over from earlier formulations
+unchanged. Under the information-theoretic frame of
+\Cref{sec:grounding}, two of them have natural information-theoretic
+re-derivations: $\eta_{\text{cal}}$ (calibration deviation) is a
+miscalibration KL divergence between predicted and empirical outcome
+distributions, and $\eta_{\text{coh}}$ (coherence deviation) is a
+KL divergence from the class-conditional baseline distribution of
+\Cref{sec:grounding}. We retain the distance-based forms here for
+continuity with the deployed system; the KL re-derivations
+constitute additional grounding work for subsequent versions.
+\end{remark}
 
 \begin{definition}[Ethical Drift Vector]
 \label{def:drift}
@@ -1644,7 +1677,7 @@ is:
 \begin{align*}
   m_{\text{sat}} &= 1 - \frac{4(-kS^* + \beta_I C^*)}{\gamma_I} \\
   &= 1 - \frac{4(-0.10 \cdot 0.082 + 0.30 \cdot 0.483)}{0.25} \\
-  &= 1 - \tfrac{0.569}{0.25} = -1.28
+  &= 1 - \tfrac{0.547}{0.25} = -1.19
 \end{align*}
 This \emph{negative} margin confirms the saturation criterion
 (\Cref{prop:saturation}): under the logistic mode with production
@@ -1729,6 +1762,24 @@ actionable governance outputs.}
 \subsection{Phase~2 Measurement: Per-Class Envelopes}
 \label{sec:phase-2-measurement}
 
+\textbf{A note on temporal seam.} The fleet-aggregate equilibrium
+statistics in \Cref{tab:eisv-observed} were measured on a snapshot
+of February~20,~2026; the per-class measurement in this
+subsection and the verdict counterfactual in
+\Cref{sec:verdict-counterfactual} were measured on a 30-day
+window ending April~18,~2026. Both draw from the same
+continuously-running deployment, but the populations have grown
+(903~$\to$~3{,}286 registered identities) over the interval. We
+report both measurements honestly because the older snapshot
+underlies the reported fleet-aggregate statistics and the newer
+one underlies the per-class measurement; reconciling them to a
+single date would require either re-deriving the fleet-aggregate
+statistics on April~18 (which would invalidate the prior
+discussion in \Cref{sec:experiments}) or running the per-class
+measurement on the smaller February snapshot (where some classes
+would fall below $N_{\min}$). The temporal seam is real and
+acknowledged.
+
 The Phase~2 calibration protocol of \Cref{sec:class-calibration}
 was executed against a $30$-day healthy-regime slice of
 \texttt{core.agent\_state} on April~18,~2026. \Cref{tab:per-class}
@@ -1792,6 +1843,116 @@ the manifold-coherence path; the remaining
 $S_{\text{scale}}, I_{\text{scale}}, E_{\text{scale}}$ constants
 (used only by the not-yet-shipped tier-1 logprob path and
 tier-2 multi-sample path) remain as Phase~1 placeholders.
+
+\subsection{Verdict Counterfactual}
+\label{sec:verdict-counterfactual}
+
+The grounded manifold-coherence form (\Cref{eq:C-manifold}) takes
+different inputs than the legacy operational form
+(\Cref{eq:coherence}): the grounded form computes a
+class-conditional distance from $(E,I,S)_{\text{healthy}}(c)$,
+while the legacy form maps $V$ through $\tanh$. The choice of
+coherence formula therefore has consequences at the gating layer,
+not just on the raw value reported. We quantify this directly by
+re-running the basin-classification step on a counterfactual in
+which the grounded form replaces the legacy form on the same
+production state vectors.
+
+\textbf{Setup.} For each row in a $30$-day window of
+\texttt{core.agent\_state} ($N = 13{,}310$ rows with computable
+$E$), we compute $C_{\text{legacy}}$ (the value already stored in
+the row, produced by the production server using
+\Cref{eq:coherence}) and $C_{\text{grounded}}(c)$ (the manifold
+form \Cref{eq:C-manifold} with class-conditional
+$(E,I,S)_{\text{healthy}}(c)$ and $\norm{\Delta}_{\max}(c)$ from
+\Cref{tab:per-class}, where $c$ is determined by the identity-tag
+classifier of \Cref{sec:class-structure}). Each row is classified
+into a basin twice using the same
+\texttt{classify\_basin($E,I,S,V,C,\text{risk}$)} function used
+in production. A flip is a row whose basin assignment differs.
+
+\textbf{Result.} 3{,}844 of 13{,}310 rows ($28.9\%$) flip basin
+assignment. \Cref{tab:counterfactual} reports per-class breakdown
+and \Cref{tab:flip-directions} reports flip directions.
+
+\begin{table}[t]
+\centering\small
+\caption{Verdict counterfactual: per-class basin flip rates when the
+grounded class-conditional manifold coherence replaces the legacy
+fleet-wide $\tanh$ form on the same state vectors.}
+\label{tab:counterfactual}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Class} & \textbf{N} & \textbf{Flips} & \textbf{\%} & $|\Delta C|_{\max}$ \\
+\midrule
+Lumen     & 7889 & 2548 & 32.3 & 0.51 \\
+default   & 2358 &  722 & 30.6 & 0.50 \\
+Sentinel  & 2227 &  351 & 15.8 & 0.51 \\
+Vigil     &  472 &  156 & 33.1 & 0.50 \\
+Watcher   &  364 &   67 & 18.4 & 0.48 \\
+\midrule
+\textbf{Total} & \textbf{13310} & \textbf{3844} & \textbf{28.9} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\caption{Flip-direction breakdown by class. Predominance of
+\texttt{high$\to$low} and \texttt{boundary$\to$low} indicates the
+legacy fleet-wide form was systematically classifying state
+vectors as healthier than their class-conditional position
+warrants.}
+\label{tab:flip-directions}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Class} & \texttt{high$\to$low} & \texttt{bnd$\to$low} & \texttt{high$\to$bnd} \\
+\midrule
+Lumen     & 1169 & 758 & 621 \\
+default   &  140 & 518 &  64 \\
+Sentinel  &   35 & 289 &  27 \\
+Vigil     &   70 &  70 &  16 \\
+Watcher   &    0 &  67 &   0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Interpretation.} The result is empirical evidence that the
+choice of coherence formula has substantial governance-decision
+consequences---the formula change is not a cosmetic relabeling
+even when both quantities live in $[0,1]$. The flip rates of
+$15$--$33\%$ are far above what could be attributed to formula
+noise; they reflect the structural difference between a fleet-wide
+$\tanh$ of $V$ and a class-conditional manifold distance from each
+class's empirically measured healthy operating point.
+
+The flip direction is informative. The dominant transition is into
+the \texttt{low} basin: agents that the production server
+classified as healthy (or borderline) under the fleet-wide form
+are classified as breaching at least one bound under the
+class-conditional grounded form. This is the
+homogenization-failure-mode argument of
+\Cref{sec:heterogeneity} made empirical at the gating layer: a
+fleet-wide constant chosen to span the worst-case envelope is
+necessarily permissive relative to the tighter envelopes of
+specific classes.
+
+We do \emph{not} claim that the grounded form is normatively
+``correct'' in every flip---a flip into \texttt{low} would surface
+a \texttt{guide} or \texttt{pause} verdict that the legacy form
+suppressed, and whether that is desirable depends on the
+agent. The contribution of this counterfactual is to establish
+that the formula choice matters at the verdict level, not just at
+the reported-value level. Calibration of which form should drive
+governance decisions, and per-class tuning of the manifold radii
+to match operator preferences, is left to subsequent work.
+
+\textbf{Reproducibility.} The script that produces this table
+(\texttt{scripts/verdict\_counterfactual.py}) is committed
+alongside the calibration script. Running it against the
+production database reproduces the per-class breakdown; running
+with \texttt{-{}-csv} produces a row-level dump for further
+analysis.
 
 \subsection{Limits of the Snapshot}
 
@@ -1866,7 +2027,7 @@ diagonal terms.
 
 \paragraph{Self-regulation $\gamma_I$.}
 Determines the I-channel's intrinsic damping. In logistic mode,
-$\gamma_I = 0.25$ yields $m_{\text{sat}} = -1.23$ at production
+$\gamma_I = 0.25$ yields $m_{\text{sat}} = -1.19$ at production
 operating points (\Cref{app:saturation})---all agents are saturated,
 relying on clamping rather than dynamics to bound $I$. In linear mode,
 $\gamma_I = 0.169$ was tuned to give $I^* \approx 0.80$, well within
@@ -2038,6 +2199,26 @@ K.~Friston.
 \newblock The free-energy principle: a unified brain theory?
 \newblock \emph{Nature Reviews Neuroscience}, 11(2):127--138, 2010.
 
+\bibitem[Da Costa et~al.(2020)]{dacosta2020active}
+L.~Da Costa, T.~Parr, N.~Sajid, S.~Veselic, V.~Neacsu, and K.~Friston.
+\newblock Active inference on discrete state-spaces: A synthesis.
+\newblock \emph{Journal of Mathematical Psychology}, 99:102447, 2020.
+
+\bibitem[Sajid et~al.(2021)]{sajid2021active}
+N.~Sajid, P.~J. Ball, T.~Parr, and K.~J. Friston.
+\newblock Active inference: demystified and compared.
+\newblock \emph{Neural Computation}, 33(3):674--712, 2021.
+
+\bibitem[Smith et~al.(2022)]{smith2022step}
+R.~Smith, K.~J. Friston, and C.~J. Whyte.
+\newblock A step-by-step tutorial on active inference and its application to empirical data.
+\newblock \emph{Journal of Mathematical Psychology}, 107:102632, 2022.
+
+\bibitem[Parr et~al.(2022)]{parr2022active}
+T.~Parr, G.~Pezzulo, and K.~J. Friston.
+\newblock \emph{Active Inference: The Free Energy Principle in Mind, Brain, and Behavior}.
+\newblock MIT Press, 2022.
+
 \bibitem[Shannon(1948)]{shannon1948}
 C.~E. Shannon.
 \newblock A mathematical theory of communication.
@@ -2148,7 +2329,7 @@ Self-regulation & $\gamma_I$ & 0.25 & Logistic damping \\
 Linear mode & $\gamma_I^{\text{lin}}$ & 0.169 & Linear damping \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Entropy channel}} \\
-Natural decay & $\mu$ & 0.80 & Dissipation \\
+Natural decay & $\mu$ & 0.80 & $S$ relaxation \\
 Drift injection & $\lambda_{1}$ & 0.30 & Base (adaptive) \\
 Coherence red. & $\lambda_{2}$ & 0.05 & $C(V)$ reduces $S$ \\
 Complexity & $\beta_c$ & 0.15 & Task $\to$ entropy \\
@@ -2156,7 +2337,7 @@ Noise & $\sigma$ & 0.02 & Stochastic term \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Void channel}} \\
 Coupling & $\kappa$ & 0.30 & $E$-$I$ gap \\
-Damping & $\delta$ & 0.40 & Dissipation \\
+Damping & $\delta$ & 0.40 & $V$ relaxation \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Coherence}} \\
 Maximum & $C_{\max}$ & 1.0 & Upper bound \\
@@ -2225,7 +2406,7 @@ Entropy inj. & $\lambda_1$ & .05--.20 & Drift $\to dS$ \\
 \label{tab:scale-constants}
 \begin{tabular}{@{}llrll@{}}
 \toprule
-\textbf{Constant} & \textbf{Sym.} & \textbf{Val.} & \textbf{Pctl} & \textbf{Source} \\
+\textbf{Constant} & \textbf{Sym.} & \textbf{Val.} & \textbf{Pctl} & \textbf{Prov.} \\
 \midrule
 Entropy & $S_{\text{scale}}$ & 3.0 & --- & placeholder \\
 MI & $I_{\text{scale}}$ & 2.0 & --- & placeholder \\
