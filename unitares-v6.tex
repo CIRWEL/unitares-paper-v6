@@ -91,8 +91,9 @@ A verdict counterfactual on a 30-day production slice
 ($N = 13{,}310$) shows that $28.9\%$ of basin assignments would flip
 under class-conditional grounded coherence, with flip rates ranging
 $15$--$33\%$ per class and a strong directional bias into the
-\texttt{low} basin---direct empirical support for the
-homogenization-failure-mode argument. A first per-class calibration
+\texttt{low} basin, showing that the homogenization-failure-mode
+argument has first-order consequences at the gating layer rather
+than only at the reported-value layer. A first per-class calibration
 of the manifold-coherence path is reported here; the remaining scale
 constants and higher-tier estimators (logprob and multi-sample) are
 deferred to subsequent work.
@@ -191,9 +192,10 @@ This paper makes five contributions:
   counterfactual on a $13{,}310$-row production slice showing that
   $28.9\%$ of basin assignments would flip under class-conditional
   grounded coherence, with the dominant direction of flips
-  (predominantly into the \texttt{low} basin) being empirical
-  support for the homogenization-failure-mode argument of contribution
-  $1$.
+  (predominantly into the \texttt{low} basin) showing that the
+  homogenization-failure-mode argument of contribution~$1$ has
+  first-order consequences at the gating layer, not only at the
+  reported-value layer.
 \end{enumerate}
 
 \subsection{Limitations and Scope}
@@ -236,17 +238,19 @@ characterizing model output distributions; calibration analysis
 confidence-outcome alignment. The variational free-energy
 principle~\cite{friston2010free} provides a unifying frame in
 which agent surprise corresponds to free energy and adaptive
-agents minimize expected surprise; the active-inference
-literature \cite{dacosta2020active,sajid2021active,smith2022step,parr2022active}
-develops the computational machinery for the free-energy quantity
-used in our $E$ coordinate. UNITARES adapts these
-information-theoretic quantities to the governance setting and
-treats the choice of computation tier (logprob, multi-sample,
+agents minimize expected surprise; the active-inference literature
+\cite{dacosta2020active,sajid2021active,smith2022step,parr2022active}
+gives a modern treatment of that lineage. We take from this
+literature the semantic referent for the $E$ coordinate (the
+variational free-energy concept of~\cite{friston2010free}); we do
+not apply the discrete-state-space machinery of the active-inference
+treatments, because the agents under governance do not generally
+expose discrete latent state-spaces to the governance layer.
+UNITARES adapts the remaining information-theoretic quantities
+(Shannon entropy, mutual information) to the governance setting
+and treats the choice of computation tier (logprob, multi-sample,
 heuristic) as a deployment configuration rather than an
-assumption. We use the variational form rather than the
-discrete-state-space active-inference form because the agents
-under governance do not generally expose discrete latent
-state-spaces to the governance layer.
+assumption.
 
 \paragraph{Contraction Theory.}
 Lohmiller and Slotine~\cite{lohmiller1998contraction} established
@@ -685,7 +689,11 @@ When the marginal $q(y)$ is unavailable, a fallback is the KL
 divergence from a context-free reference
 distribution $q_{\text{ref}}(y)$:
 $I = 1 - \min(1,\, D_{\mathrm{KL}}(q(y\mid x)\,\|\, q_{\text{ref}}(y)) / I_{\text{scale}})$.
-Tier~3 retains the legacy logistic heuristic.
+This KL fallback is a divergence from a reference distribution, not
+$\mathrm{MI}(x;y)$, and is tagged
+\texttt{i\_source = "kl\_fallback"} so downstream consumers know
+the channel is a reference-distribution proxy rather than a direct
+MI estimate. Tier~3 retains the legacy logistic heuristic.
 
 \paragraph{$E$---Negative Free Energy.}
 Under the variational frame,
@@ -698,12 +706,19 @@ Under the variational frame,
 where $q(z)$ is the agent's approximate posterior, $p(z,o)$ its
 generative model over latents and outcomes, and $\sigma$ the logistic
 function. Intuitively, $E$ is high when the agent's predictions match
-outcomes (low surprise) and low otherwise. A deployment-configurable
-alternative is the \emph{resource-rate} form
-$E_{\text{resource}} = (\text{tokens}/s) / (\text{tokens}/s)_{\max}$,
-which approximates $-F$ under stationary conditions and is directly
-measurable from inference metadata. Both forms expose themselves via
-an \texttt{e\_source} annotation.
+outcomes (low surprise) and low otherwise. Full variational
+computation of $-F$ requires instrumentation that exposes the
+agent's generative model and is deferred to subsequent work. In
+the current deployment, a \emph{resource-rate} heuristic proxy
+$E_{\text{resource}} = (\text{tokens}/s) / (\text{tokens}/s)_{\max}$
+is used where available, directly measurable from inference
+metadata. The resource-rate form is \emph{not} equivalent to $-F$
+and does not approximate it under stationarity in any formal
+sense; it is a throughput heuristic tagged
+\texttt{e\_source = "resource"} so downstream consumers know the
+channel is an uncalibrated proxy. The \texttt{e\_source}
+annotation distinguishes genuine variational $-F$ from the
+resource-rate proxy on a per-agent-turn basis.
 
 \paragraph{$V$---Free-Energy Debt.}
 The existing $V$ accumulator in \Cref{eq:dV} is structurally an
@@ -786,16 +801,26 @@ updated accordingly.
 \section{Stability}
 \label{sec:contraction}
 
-The EISV dynamics of \Cref{sec:dynamics} are globally
-exponentially stable.
-Specifically, the system is contracting with rate
-$\alpha_c > 0$ under a Riemannian metric
-$M = \operatorname{diag}(0.1, 0.2, 1.0, 0.08)$. The spectral
-abscissa of the linearized system at the equilibrium gives
+Contraction~\cite{lohmiller1998contraction} means that any two
+trajectories of the system converge exponentially toward each
+other under a Riemannian metric $M$ at rate $\alpha_c > 0$; for
+UNITARES this implies governance trajectories forget their
+initial conditions and settle onto a unique equilibrium
+regardless of start state. The EISV dynamics of
+\Cref{sec:dynamics} are globally exponentially stable in this
+sense. Specifically, the system is contracting with rate
+$\alpha_c > 0$ under the metric
+$M = \operatorname{diag}(0.1, 0.2, 1.0, 0.08)$, whose diagonal
+weights reflect the relative scales of the four channels: $S$
+fluctuates fastest and is given unit weight, while $V$ is damped
+most and given the smallest weight (derivation in
+\Cref{app:contraction-proof}). The spectral abscissa of the
+linearized system at the equilibrium gives an actual rate
 $\alpha_c \approx 0.13$ at production parameters; a conservative
-Gershgorin argument establishes a strictly-less lower bound of
-$\alpha_c = 0.019$ used for the stochastic and network bounds in
-\Cref{sec:stochastic,sec:network}. Both certificates appear in
+Gershgorin argument establishes a strictly-less lower bound
+$\alpha_c \geq 0.019$ used only to make the stochastic and
+network bounds in \Cref{sec:stochastic,sec:network} worst-case
+conservative. Both certificates appear in
 \Cref{app:contraction-proof}.
 
 Formally: under linear information dynamics
@@ -819,11 +844,17 @@ the coordinates and the values of the scale constants change.
 The contraction certificate of \Cref{thm:contraction} relies on
 fleet-wide bounds (notably $\beta_I C'_{\max}$); under
 class-conditional normalization, the relevant bounds become
-class-indexed, and the contraction analysis carries through
-class-by-class with each class's own $\alpha_c(c)$. The
-equilibrium $\eisv^*$ becomes the class-conditional healthy
-operating point of \Cref{def:scale-map} in deployments where
-calibration has been performed. Cross-class network
+class-indexed, and the contraction \emph{structure} carries
+through class-by-class, with each class acquiring its own
+$\alpha_c(c)$ upon re-certification at its class-conditional
+healthy operating point. The equilibrium $\eisv^*$ becomes the
+class-conditional healthy operating point of
+\Cref{def:scale-map} in deployments where calibration has been
+performed. A per-class numerical rate is not computed in this
+paper: the deployed certificate of \Cref{app:contraction-proof}
+remains valid for the legacy $\tanh$-of-$V$ coherence, and
+re-certification under a grounded coherence is treated in
+\Cref{rem:phase3-contraction}. Cross-class network
 synchronization (\Cref{thm:network}) is therefore a
 within-class property, as already qualified in \Cref{sec:network};
 fleet-wide synchronization across heterogeneous classes is not
@@ -1171,6 +1202,22 @@ where $\Delta(a) = (E(a), I(a), S(a)) - (E,I,S)_{\text{healthy}}(k(a))$
 is the deviation from the class-conditional healthy operating
 point. The dynamics of \Cref{sec:dynamics} are unchanged; only the
 normalization layer becomes class-aware.
+
+\begin{remark}[Scope of class-conditionality]
+\label{rem:class-scope}
+This is class-conditional \emph{statistical rescaling} of the
+grounded coordinates: each class receives its own scale constants
+and healthy operating point, but a single scalar
+$E_{\text{raw}}(a)$, $I_{\text{raw}}(a)$, $S_{\text{raw}}(a)$ is
+computed per agent-turn and then normalized by class-dependent
+constants. This is weaker than the FEP-native form in which each
+class would carry its own generative model $p_c(z, o)$ and
+surprise would be computed against each class's own model. Full
+per-class generative modeling is out of scope for this paper; the
+present design treats class as an affine rescaling parameter of a
+shared coordinate system, not as a per-class latent-variable
+model.
+\end{remark}
 
 \begin{definition}[Class-Conditional Scale Map]
 \label{def:scale-map}
@@ -1730,6 +1777,15 @@ re-running the basin-classification step on a counterfactual in
 which the grounded form replaces the legacy form on the same
 production state vectors.
 
+The basin classifier \texttt{classify\_basin} maps
+$(E,I,S,V,C,R)$ to one of three regions---\texttt{high},
+\texttt{boundary}, \texttt{low}---consumed by the production
+dashboard and escalation logic alongside the
+$\Phi$-thresholded verdict of \Cref{eq:verdict}. A
+\emph{basin flip} is a row whose classifier output differs
+between the legacy and grounded coherence inputs; it is the
+observable downstream of which this counterfactual measures.
+
 \textbf{Setup.} For each row in a $30$-day window of
 \texttt{core.agent\_state} ($N = 13{,}310$ rows with computable
 $E$), we compute $C_{\text{legacy}}$ (the value already stored in
@@ -1772,9 +1828,9 @@ Watcher   &  364 &   67 & 18.4 & 0.48 \\
 \centering\small
 \caption{Flip-direction breakdown by class. Predominance of
 \texttt{high$\to$low} and \texttt{boundary$\to$low} indicates the
-legacy fleet-wide form was systematically classifying state
-vectors as healthier than their class-conditional position
-warrants.}
+two formulations disagree asymmetrically: state vectors the
+fleet-wide form classifies as healthy are more often reclassified
+as breaching under the class-conditional form than vice-versa.}
 \label{tab:flip-directions}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
@@ -1802,12 +1858,17 @@ The flip direction is informative. The dominant transition is into
 the \texttt{low} basin: agents that the production server
 classified as healthy (or borderline) under the fleet-wide form
 are classified as breaching at least one bound under the
-class-conditional grounded form. This is the
-homogenization-failure-mode argument of
-\Cref{sec:heterogeneity} made empirical at the gating layer: a
-fleet-wide constant chosen to span the worst-case envelope is
-necessarily permissive relative to the tighter envelopes of
-specific classes.
+class-conditional grounded form. This is the gating-layer
+footprint of the homogenization-failure-mode argument of
+\Cref{sec:heterogeneity}: a fleet-wide constant spanning the
+worst-case envelope is, by construction, permissive relative to
+per-class envelopes, and the flip data quantifies how often that
+permissiveness changes the verdict. The magnitude of the
+consequence (29\% fleet-wide, up to 33\% per class) is empirical;
+the directional asymmetry is a mechanical consequence of
+replacing a fleet-wide envelope with per-class envelopes, not an
+independent corroboration of the theory that motivated the
+replacement.
 
 We do \emph{not} claim that the grounded form is normatively
 ``correct'' in every flip---a flip into \texttt{low} would surface
@@ -1916,19 +1977,21 @@ equality would defeat the point of grounding.
 
 The mechanism we use instead is pipeline-ordering. The server's
 \texttt{process\_agent\_update} request pipeline runs in two
-phases: a \emph{phases} phase that computes governance state and
-issues the verdict, and an \emph{enrichments} phase that augments
-the response payload with secondary signals. The enrichments
-phase is registered as an ordered list; entries with lower order
-run first. We register the grounding computation as an enrichment
-at order $75$, downstream of every entry that contributes to the
-verdict and basin classification but upstream of presentation
-enrichments such as the human-readable summary and the broadcaster
-event.
+stages---which we will call the \emph{decision stage} (internally
+named \texttt{phases} in the server code) and the \emph{payload
+stage} (internally \texttt{enrichments}). The decision stage
+computes governance state and issues the verdict; the payload
+stage augments the response with secondary signals. Payload-stage
+handlers are registered with integer priorities in the range
+$[0, 100]$ (lower runs first). We register the grounding
+computation as a payload-stage handler at priority $75$,
+downstream of every handler that contributes to the verdict and
+basin classification but upstream of presentation handlers such as
+the human-readable summary and the broadcaster event.
 
-The result: by the time the grounding enrichment runs, the verdict
+The result: by the time the grounding handler runs, the verdict
 has already been computed---using the legacy values produced by
-the phases phase. The grounding enrichment then swaps grounded
+the decision stage. The grounding handler then swaps grounded
 values into the canonical
 $\{E, I, S, C\}$ slots, copying the originals into
 $\{E_{\text{legacy}}, \dots\}$. The response payload carries
