@@ -87,3 +87,82 @@ Every change lands as one commit with the regression test paired. If Phase 2's s
 - Phase 1 (diagnose via logs + code read): 30–60 min.
 - Phase 2 (fix + regression test): 1–2 hr.
 - Total: one working session. Phase 3 and 4 are deferred.
+
+## Diagnosis complete (2026-04-18, Phase 1)
+
+Server logs at `data/logs/mcp_server_error.log` reveal the archival trigger:
+
+```
+src.agent_lifecycle - INFO - Auto-archived orphan agent: 0f009240-a7b...
+  (orphan UUID agent, 0 updates, 6.0h old)
+```
+
+**Trigger:** `src/agent_lifecycle.py:122` matches `is_uuid_named AND updates==0 AND age_hours >= zero_update_hours (1.0)`.
+
+**Why "6.0h" for a 30-second-old agent:** `_agent_age_hours` reads `meta.last_update or meta.created_at`. Fresh agents have null `last_update`, so they fall back to `created_at`.
+
+**Root cause:** `src/mcp_handlers/identity/persistence.py:80`:
+
+```python
+"created_at": binding.get("created_at") or datetime.now(timezone.utc).isoformat()
+```
+
+`binding` is a Redis-cached session binding. When a prior agent from the same session fingerprint has been archived but its binding is still in the cache, the fresh onboard **reuses the stale binding and inherits its `created_at` timestamp**. The new agent is born with the dead agent's birthday — hours in the past — so the orphan-archive cron archives it on its next sweep.
+
+This creates a self-reinforcing trap: every retry reuses the binding from the just-archived agent, so age never resets, every fresh UUID dies instantly.
+
+## Minimal fix (one line)
+
+`src/mcp_handlers/identity/persistence.py:80`:
+
+```python
+# Before:
+"created_at": binding.get("created_at") or datetime.now(timezone.utc).isoformat(),
+# After:
+"created_at": datetime.now(timezone.utc).isoformat(),
+```
+
+A fresh agent should have a fresh birthday. Inheriting a timestamp from a cached binding was never the intent — it's a coalescing bug that only manifests after a prior agent under the same binding has been archived.
+
+## Defensive fix (optional, belt-and-suspenders)
+
+In `src/agent_lifecycle.py::classify_for_archival`, guard against created_at-before-process-start:
+
+```python
+import time
+process_start = time.time() - _PROCESS_AGE_SECONDS
+if age_hours is not None and time.time() - age_hours*3600 < process_start:
+    # meta.created_at predates this process; likely stale binding
+    logger.warning(f"Suspicious created_at for {agent_id}: skipping archival")
+    return False, ""
+```
+
+This wouldn't fix the root cause but would have prevented the manifestation without the persistence.py change.
+
+## Regression test sketch
+
+```python
+async def test_onboard_force_new_survives_stale_binding_collision():
+    # Create first agent, archive it (simulates the prior-session carcass)
+    r1 = await onboard(name="test-claude", force_new=True)
+    await archive_agent(r1["uuid"])  # forces stale binding to remain
+
+    # Onboard fresh — must not inherit r1's created_at
+    r2 = await onboard(name="test-claude", force_new=True)
+    assert r2["uuid"] != r1["uuid"]
+
+    # Trigger the archive cron
+    archived = await auto_archive_orphan_agents()
+    assert r2["uuid"] not in [a["id"] for a in archived]
+
+    # Fresh agent must accept an update
+    result = await process_agent_update(
+        client_session_id=r2["client_session_id"],
+        response_text="test"
+    )
+    assert result["success"] is True
+```
+
+## Stopped here per user off-ramp
+
+Phase 1 diagnosis complete with high confidence. Phase 2 implementation deferred to a focused follow-up session — the fix itself is one line plus the regression test, but proper verification (run cron, observe behavior, confirm no regression on existing resume paths) is 1-2 hours of careful work that should not be rushed at the tail end of a long session.
