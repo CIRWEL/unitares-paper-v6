@@ -5,37 +5,35 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647159.svg)](https://doi.org/10.5281/zenodo.19647159)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-Paper artifact repository for v6 of the UNITARES research program.
-
-- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (29 pages)
+- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (29 pages, latest tag `paper-v6.5`)
 - 📝 [`unitares-v6.tex`](./unitares-v6.tex) — LaTeX source
-- 🖼 [`figures/`](./figures/) — 6 figures from production deployment data (Feb 20, 2026 snapshot and Apr 18, 2026 30-day window)
+- 🖼 [`figures/`](./figures/) — 6 figures from deployment data (Feb 20, 2026 snapshot; Apr 18, 2026 30-day window)
 
-## What this paper introduces
+---
 
-Two structural reframings of UNITARES:
+## What the paper argues
 
-1. **Information-theoretic grounding** of the EISV state vector — `S` as Shannon entropy of the response distribution, `I` as mutual information between context and response, `E` as negative variational free energy, `V` as accumulated free-energy residual. Each coordinate ships with a tiered computation recipe (logprob, multi-sample, heuristic) and a provenance-tagged scale constant.
+Governance of autonomous AI agents is usually assembled from output filters, dashboards, and post-hoc evaluators — each operating on a population the designer imagined as roughly homogeneous. UNITARES argues that this assumption fails once a real fleet is heterogeneous: embodied agents with sensor-driven state, persistent autonomous services, session-bounded coding assistants, and ephemeral parser agents do not share an output modality, a tempo, or a healthy operating point. Fleet-wide normalization is then the wrong target, and a governance framework that collapses the population to a single distribution — what we call *cosmological soup* — loses signal exactly where signal matters.
 
-2. **Class-conditional calibration** as a first-class design constraint — fleet-wide normalization is rejected as the wrong target for heterogeneous deployments (embodied creatures, persistent autonomous services, session-bounded coding assistants, ephemeral parser agents). Scale constants and healthy operating points are functions of an agent class, keyed on existing identity tags, with fleet-wide defaults retained only as fallback behavior.
+The paper makes two structural moves:
 
-Methodologically, the paper introduces a **pipeline-ordering migration mechanism** (§12) that allows the semantic coordinates of a deployed governance framework to be re-grounded without changing live governance behavior during the transition. This mechanism is presented as a reusable pattern beyond UNITARES itself.
+1. **Information-theoretic grounding of the EISV state vector** — `S` as Shannon entropy of the response distribution, `I` as mutual information between context and response, `E` as negative variational free energy, `V` as accumulated free-energy residual. Each coordinate ships with a tiered computation recipe (logprob, multi-sample, heuristic) and a provenance-tagged scale constant.
 
-## Headline empirical finding
+2. **Class-conditional calibration** — scale constants and healthy operating points are functions of an agent class, keyed on existing identity tags, with fleet-wide defaults retained only as fallback. Phase 2 measurement on five production classes (Lumen, Sentinel, Vigil, Watcher, default) over a 30-day window is reported in §11.5; per-class manifold radii span a 3.3× range, directly contradicting the fleet-wide assumption.
 
-A **verdict counterfactual on a 13,310-row production slice** (§11.6) shows that 28.9% of basin assignments flip when the grounded class-conditional coherence replaces the legacy fleet-wide `tanh` form on the same state vectors, with flip rates ranging 15–33% per class and a dominant direction into the `low` basin. This is direct empirical support for the homogenization-failure-mode argument: a fleet-wide constant chosen to span the worst-case envelope is necessarily permissive relative to the tighter envelopes of specific classes.
+## The headline finding
 
-## What this paper is and isn't
+A verdict counterfactual on a 13,310-row production slice (§11.6) shows that **28.9% of governance basin assignments flip** when the grounded class-conditional coherence replaces the legacy fleet-wide `tanh` form on the same state vectors. Flip rates range 15–33% per class, with a dominant directional bias into the `low` basin — the fleet-wide form was systematically permissive relative to tighter class envelopes. The homogenization-failure-mode argument has first-order consequences at the gating layer, not only at the reported-value layer.
 
-This is a **framework + migration paper**. Its primary claims are architectural and methodological: that heterogeneous fleets require class-conditional calibration, that the EISV coordinates can be reinterpreted information-theoretically without changing the governing dynamics, and that a deployed governance system can be re-grounded by separating decision-producing from presentation-producing stages in the request pipeline.
+## The methodological contribution
 
-Three boundaries matter. First, the class-conditional calibration protocol is specified (§8), and the manifold-coherence path is measured on five agent classes over a 30-day production window (§11.5). Second, the remaining `S_scale`, `I_scale`, `E_scale` constants — used only by the higher-fidelity tier-1 (logprob) and tier-2 (multi-sample) estimators — remain provenance-tagged placeholders awaiting inference-layer instrumentation. Third, the production results in §11 are a descriptive snapshot of the deployed system rather than a controlled validation study across stable parameter regimes.
+Re-grounding a deployed framework while service continues is a live-systems problem distinct from the mathematical one. §12 documents a **pipeline-ordering migration mechanism** that separates decision-producing from presentation-producing pipeline stages: governance verdicts fire on legacy values while the grounding computation runs as a post-verdict enrichment, so grounded values populate canonical response fields without changing live governance behavior. The mechanism generalizes beyond UNITARES — any deployed agent framework facing a semantic-coordinate change can apply it, given a request pipeline with explicit ordering between decision and presentation stages.
 
-The paper should therefore be read as establishing the framework, the migration mechanism, and the shape of the empirical program, while deferring full class-conditional validation to subsequent work.
+## Scope
+
+The contraction analysis (Appendix B), the grounded coordinate definitions (§4), and the class-conditional calibration protocol (§8) are fully specified. The manifold-coherence path is measured per-class on production data. The `S_scale`, `I_scale`, `E_scale` constants — used only by the higher-fidelity tier-1 (logprob) and tier-2 (multi-sample) estimators — remain provenance-tagged placeholders awaiting inference-layer instrumentation. Per-class results in §11.5 are a descriptive measurement on the deployed system rather than a controlled validation study across stable parameter regimes; the paper flags this explicitly (§11.7).
 
 ## Reading aids
-
-Four terms the paper uses up front:
 
 - **Variational free energy** (`−F`, used as the `E` coordinate) — the Free-Energy-Principle quantity measuring how well an agent's predictions match outcomes; high `E` = low surprise.
 - **Cosmological soup** — the failure mode of averaging a heterogeneous agent fleet into a single state distribution, in which no population structure survives normalization.
@@ -44,18 +42,16 @@ Four terms the paper uses up front:
 
 ## Companion code
 
-The deployed governance system that this paper describes lives at:
+The deployed governance system this paper describes:
 - [CIRWEL/unitares](https://github.com/CIRWEL/unitares)
 
-The grounding implementation (Phases 1 + 2 referenced in §12) was merged to `master` via [PR #26](https://github.com/CIRWEL/unitares/pull/26).
+The grounding implementation (Phases 1+2 referenced in §12) was merged to `master` via [PR #26](https://github.com/CIRWEL/unitares/pull/26).
 
 ## Building the PDF
 
-Standard LaTeX install (TeX Live or MacTeX) covers all dependencies:
-
 ```bash
 pdflatex unitares-v6.tex
-pdflatex unitares-v6.tex   # second pass for cleveref/bibliography resolution
+pdflatex unitares-v6.tex   # second pass for cleveref and bibliography
 ```
 
 Required packages: `amsmath`, `amssymb`, `mathtools`, `bm`, `graphicx`, `booktabs`, `hyperref`, `cleveref`, `natbib`, `xcolor`, `caption`.
