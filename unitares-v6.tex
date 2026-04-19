@@ -247,14 +247,20 @@ state that evolves between actions, providing leading indicators of
 degradation rather than binary verdicts after the fact.
 
 Ravindran~\cite{ravindran2025moral} proposes a Moral Anchor System
-(MAS) that detects value drift using a three-dimensional state vector
-with Bayesian inference and LSTM-based forecasting. While MAS and
-UNITARES share the goal of detecting value-level drift, they differ
-fundamentally: MAS is a statistical detection pipeline that predicts
-drift from observed behavior, whereas UNITARES models drift as a
-dynamical force that couples into the state equations, providing
-contraction-theoretic stability guarantees that statistical methods
-cannot offer.
+(MAS) that detects value drift using a three-dimensional state
+vector with Bayesian inference and LSTM-based forecasting. The
+differentiation is twofold. First, \emph{scope}: MAS targets
+\emph{value}-level drift against a declared value specification,
+while UNITARES's behavioral--epistemic drift vector
+(\Cref{sec:ethical-drift}) explicitly does not measure values---the
+four components instrument decision consistency, coherence departure,
+calibration gap, and complexity self-estimation error. The two
+vectors are complementary channels, not competing formulations.
+Second, \emph{coupling}: MAS is a statistical detection pipeline
+that predicts drift from observed behavior; UNITARES couples drift
+into the state equations themselves via the $\norm{\Delta\bm\eta}$
+term in \Cref{eq:dE,eq:dS}, so drift acts as a forcing on the
+governed dynamics rather than as an external signal.
 
 Concurrent work on runtime governance for agentic systems includes
 MI9~\cite{wang2025mi9}, which combines an agency-risk index with
@@ -802,22 +808,21 @@ within-class property, as already qualified in \Cref{sec:network};
 fleet-wide synchronization across heterogeneous classes is not
 claimed and would not be expected.
 
-\begin{remark}[Phase 3 re-certification]
+\begin{remark}[Contraction under a grounded coherence]
 \label{rem:phase3-contraction}
-Phases 1 and 2 (\Cref{sec:migration}) preserve the operational
-$\cv = \tanh$-based form that the contraction proof of
-\Cref{app:contraction-proof} consumes through the off-diagonal
-bound $\beta_I C'_{\max} = 0.15$. In Phase 3, the dynamics
-themselves are rewired to consume a grounded coherence
-(\Cref{eq:C-manifold} or \Cref{eq:C-KL}), which changes the
-relevant Jacobian entries: $\partial \cv / \partial V$ is replaced
-by derivatives with respect to $(E, I, S)$, altering the structure
-of the off-diagonal bound on which the Gershgorin argument
-depends. The contraction certificate therefore does not carry over
-to Phase 3 unconditionally; re-certification at the new operating
-point with the new coherence derivative is required. The proof
-structure of \Cref{app:contraction-proof} adapts, but the
-numerical rate $\alpha_c$ will change.
+The contraction proof of \Cref{app:contraction-proof} consumes
+the operational $\cv = \tanh$-based form through the off-diagonal
+bound $\beta_I C'_{\max} = 0.15$. A deployment that rewires the
+dynamics to consume a grounded coherence (\Cref{eq:C-manifold} or
+\Cref{eq:C-KL}) directly replaces $\partial \cv / \partial V$ by
+derivatives with respect to $(E, I, S)$, altering the off-diagonal
+bound on which the Gershgorin argument depends. Re-certification
+at the new operating point with the new coherence derivative is
+required; the proof structure adapts but the numerical rate
+$\alpha_c$ will change. The migration sequence of
+\Cref{sec:migration} is designed so this rewiring is the final
+step, preserving the deployed contraction certificate until it
+is replaced.
 \end{remark}
 
 
@@ -2242,33 +2247,6 @@ counterfactual reported in \Cref{sec:experiments}. We defer the
 weight-perturbation verdict-flip study to subsequent work with
 the same infrastructure.
 
-\subsection{Boundary Clamping and Non-Smoothness}
-
-The EISV state is clamped to $\mathcal{X}$ at each integration step,
-introducing non-smoothness at domain boundaries. We address this in
-three ways:
-
-\paragraph{Interior operation.}
-The epistemic humility floor ($S_{\min} = 0.001$) and the contraction
-dynamics ensure that trajectories remain in the interior of
-$\mathcal{X}$ during normal operation. In production, only 19 of 903
-agents (2.1\%) contact the $I = 1$ boundary, all in the CONVERGENCE
-regime with few updates, confirming that interior operation is the norm.
-
-\paragraph{Projected dynamical systems.}
-When boundary contact does occur, the clamping operation implements a
-projection onto the constraint set $\mathcal{X}$. Projected dynamical
-systems preserve contraction properties when the constraint set is
-convex~\cite{lohmiller1998contraction}, which $\mathcal{X}$ (a
-hyperrectangle) is.
-
-\paragraph{Practical monitoring.}
-The saturation diagnostic (\Cref{sec:saturation}) monitors the
-I-channel's distance from the boundary. When $m_{\text{sat}} < 0.1$,
-the system logs a warning and the adaptive governor tightens
-thresholds pre-emptively, preventing boundary contact rather than
-relying on clamping to maintain invariance.
-
 \subsection{Limitations}
 
 \begin{enumerate}
@@ -2918,6 +2896,35 @@ linear mode rollout. We report the snapshot as-is rather than filtering
 to a ``clean'' parameter regime, since the saturation criterion
 (\Cref{prop:saturation}) depends only on the relationship $A > \gamma_I/4$,
 which holds regardless of the agent's configuration history.
+
+
+\section{Boundary Clamping and Non-Smoothness}
+\label{app:boundary-clamping}
+
+The EISV state is clamped to $\mathcal{X}$ at each integration step,
+introducing non-smoothness at domain boundaries. Three mechanisms
+keep the dynamics well-behaved despite this:
+
+\paragraph{Interior operation.}
+The epistemic humility floor ($S_{\min} = 0.001$) and the contraction
+dynamics keep trajectories in the interior of $\mathcal{X}$ during
+normal operation. In production, only $19$ of $903$ agents (2.1\%)
+contact the $I = 1$ boundary, all in the \texttt{CONVERGENCE} regime
+with few updates; interior operation is the norm.
+
+\paragraph{Projected dynamical systems.}
+When boundary contact does occur, the clamping operation implements
+a projection onto the constraint set $\mathcal{X}$. Projected
+dynamical systems preserve contraction properties when the
+constraint set is convex~\cite{lohmiller1998contraction}, which
+$\mathcal{X}$ (a hyperrectangle) is.
+
+\paragraph{Pre-emptive tightening.}
+The saturation diagnostic of \Cref{sec:saturation} monitors the
+I-channel's distance from the boundary. When $m_{\text{sat}} < 0.1$
+the system logs a warning and the adaptive governor tightens
+thresholds pre-emptively, preventing boundary contact rather than
+relying on clamping to maintain invariance.
 
 
 \end{document}
