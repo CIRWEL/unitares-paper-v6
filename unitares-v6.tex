@@ -66,20 +66,24 @@ operating point, so fleet-wide normalization is the wrong target.
 
 UNITARES addresses this with two structural moves. First, it
 reinterprets the EISV coordinates in information-theoretic terms:
-$S$ as response-distribution entropy, $I$ as context-response mutual
-information, $E$ as negative variational free energy or a resource-rate
-proxy, and $V$ as an accumulated free-energy residual. Second, it makes
-normalization class-conditional: scale constants and healthy operating
-points are functions of an agent class keyed on existing identity tags,
-with fleet-wide defaults retained only as fallback behavior.
+$S$ as response-distribution entropy, $I$ as context-response
+mutual information, $E$ as negative variational free energy, and
+$V$ as an accumulated free-energy residual. Second, it makes
+normalization class-conditional: scale constants and healthy
+operating points are functions of an agent class keyed on
+existing identity tags, with fleet-wide defaults retained only as
+fallback behavior.
 
-Because UNITARES was already deployed, re-grounding the coordinates
-raised a live-systems problem in addition to a mathematical one. We
-therefore introduce a pipeline-ordering migration mechanism that
-preserves governance behavior while allowing grounded values to populate
-canonical response fields. Stability of the dynamics is preserved under
-the reformulation and established by contraction analysis
-(Appendix~B).
+Because UNITARES was already deployed, re-grounding the
+coordinates raised a live-systems problem in addition to a
+mathematical one. We introduce a pipeline-ordering migration
+mechanism that separates decision-producing from
+presentation-producing pipeline stages so a deployed governance
+framework can acquire new coordinate semantics without breaking
+live behavior; we argue this mechanism generalizes to any
+deployed agent framework facing a semantic-coordinate change.
+Stability of the dynamics is preserved under the reformulation
+and established by contraction analysis (Appendix~B).
 
 We illustrate the framework with a production deployment snapshot from
 February 20, 2026, covering 903 registered agents and 75 active agents.
@@ -97,6 +101,24 @@ multi-sample) are deferred to subsequent work.
 variational free energy, heterogeneous multi-agent systems,
 class-conditional calibration, AI safety
 
+\vspace{1ex}
+\noindent\fbox{\parbox{0.97\columnwidth}{\small
+\textbf{Reading aids.} We introduce four terms up front:
+\emph{Variational free energy} ($-F$, used as the $E$ coordinate):
+the Free-Energy-Principle quantity measuring how well an agent's
+predictions match outcomes; high $E$ = low surprise.
+\emph{Cosmological soup}: the failure mode of averaging a
+heterogeneous agent fleet into a single state distribution, in
+which no population structure survives normalization.
+\emph{Manifold coherence} ($C = 1 - \norm{\Delta}_2 / \norm{\Delta}_{\max}$):
+distance from the agent class's healthy operating point, used as
+a class-conditional replacement for the legacy
+$\tanh$-of-$V$ coherence.
+\emph{Basin flip}: a change in governance-basin assignment
+(\texttt{high} / \texttt{boundary} / \texttt{low}) when the same
+state vector is classified under different coherence formulas.
+}}
+
 % ═══════════════════════════════════════════════════════════
 \section{Introduction}
 \label{sec:intro}
@@ -109,10 +131,11 @@ provide safety but impede capability. \emph{Soft monitoring}
 (logging, dashboards) preserves capability but offers no formal
 guarantees.
 
-We argue that governance should be \emph{intrinsic}---a continuous
-dynamical process that shapes agent behavior from within, much as
-homeostatic regulation governs biological organisms. This paper
-presents UNITARES, a framework
+We argue that governance should be \emph{intrinsic}: a
+continuous dynamical process that shapes agent behavior from
+within, producing leading indicators of degradation rather than
+binary verdicts after the fact. This paper presents UNITARES, a
+framework
 in which each agent carries a four-dimensional state
 $\eisv = (E, I, S, V)^\top$ whose evolution is governed by coupled
 differential equations. The state provides a continuous,
@@ -451,11 +474,10 @@ coordinate to \Cref{sec:grounding}.
 \begin{remark}[State-space bounds]
 The grounded definitions of \Cref{sec:grounding} normalize each
 coordinate to $[0,1]$ (or $[-1,1]$ for $V$) by construction via
-the scale constants of \Cref{sec:class-calibration}. Production
-data (\Cref{sec:experiments}) shows $V \in [-0.089, 0.007]$ and
-$S \approx 0.08$ across the active fleet---two orders of
-magnitude inside the nominal bounds---consistent with the
-normalization acting as intended.
+the scale constants of \Cref{sec:class-calibration}; production
+data confirms the normalization acts as intended, with $V$ and
+$S$ observed two orders of magnitude inside the nominal bounds
+(\Cref{sec:experiments}).
 \end{remark}
 
 \subsection{Governing Equations}
@@ -567,15 +589,13 @@ agent with $E = 0.7$, $I = 0.8$, $S = 0.2$ yields $\Phi \approx
 \section{Information-Theoretic Grounding}
 \label{sec:grounding}
 
-The \eisv\ system presented in \Cref{sec:dynamics} is
-phenomenological: each coordinate has a physical interpretation and the
-coupling structure is thermodynamically motivated, but the coordinates
-are not themselves thermodynamic quantities---the analogy was a
-labeling convenience, not a derivation. The phenomenological form
-leaves every constant hand-tuned and every threshold empirically
-discovered rather than derived. This section upgrades the
-phenomenology to a computable information-theoretic grounding
-without changing the dynamics of \Cref{sec:equations}.
+The \eisv\ system presented in \Cref{sec:dynamics} specifies a
+coupled dynamical signal for governance decisions but does not
+specify what each coordinate measures. This section supplies the
+information-theoretic semantics: each coordinate becomes a
+computable quantity with a tiered estimation recipe and a
+provenance tag, without changing the dynamics of
+\Cref{sec:equations}.
 
 \begin{remark}[What stays, what changes]
 The ODE structure in \Cref{eq:dE,eq:dI,eq:dS,eq:dV}, the contraction
@@ -723,16 +743,20 @@ reference.
 
 Every scale constant introduced in
 \Cref{eq:S-grounded,eq:I-grounded,eq:E-grounded,eq:C-manifold}
-is a measured quantity, not a guess. For each constant
-$\kappa \in \{S_{\text{scale}}, I_{\text{scale}}, E_{\text{scale}}, \norm{\Delta}_{\max}\}$,
-the implementation records: the numerical value, the ISO date on
-which it was set, the corpus size over which it was measured, the
-percentile basis (typically 90th or 95th of a healthy-fleet
-distribution), and a provenance tag in
-$\{\text{placeholder},\text{measured},\text{derived}\}$. Phase~1
-ships placeholder values tagged explicitly; Phase~2 replaces them
-with measured values per the protocol in the implementation plan
-with results reported in subsequent work.
+carries an explicit provenance tag recording whether its value is
+a \emph{placeholder} (shipped as scaffolding, pending a
+higher-fidelity estimator), \emph{measured} (fit against a
+reference corpus of healthy production agent-turns), or
+\emph{derived} (computed from other measured constants). For
+each constant $\kappa \in \{S_{\text{scale}}, I_{\text{scale}},
+E_{\text{scale}}, \norm{\Delta}_{\max}\}$, the implementation
+records the numerical value, the ISO date on which it was set,
+the corpus size, and the percentile basis (typically 90th or
+95th). As of v6, $\norm{\Delta}_{\max}$ has been measured
+per-class (\Cref{sec:phase-2-measurement}); the remaining
+constants, which are consumed only by the tier-1 logprob and
+tier-2 multi-sample estimators, remain placeholders until those
+estimators land.
 
 \subsection{Dual-Compute Migration}
 
@@ -765,11 +789,13 @@ The EISV dynamics of \Cref{sec:dynamics} are globally
 exponentially stable.
 Specifically, the system is contracting with rate
 $\alpha_c > 0$ under a Riemannian metric
-$M = \operatorname{diag}(0.1, 0.2, 1.0, 0.08)$, with
-$\alpha_c = 0.019$ certified by Gershgorin analysis at production
-parameters. This rate is a conservative lower bound; observed
-convergence in the production deployment is faster
-(\Cref{sec:experiments}).
+$M = \operatorname{diag}(0.1, 0.2, 1.0, 0.08)$. The spectral
+abscissa of the linearized system at the equilibrium gives
+$\alpha_c \approx 0.13$ at production parameters; a conservative
+Gershgorin argument establishes a strictly-less lower bound of
+$\alpha_c = 0.019$ used for the stochastic and network bounds in
+\Cref{sec:stochastic,sec:network}. Both certificates appear in
+\Cref{app:contraction-proof}.
 
 Formally: under linear information dynamics
 ($g_I(I) = \gamma_I I$) and production parameters, the EISV
@@ -986,30 +1012,12 @@ The behavioral--epistemic drift vector instruments four signals:
 decision consistency and coherence departure (behavioral),
 calibration gap and complexity self-estimation error (epistemic).
 None of them measure the agent's values in a normative sense; the
-vector is a deliberately behavioral--epistemic quantity. Two
-adjacent axes that a complete treatment would include as distinct
-channels, but which the present vector does \emph{not}
-instrument, are:
-
-\begin{description}
-\item[Emotional / affective drift.] For embodied agents with
-  sensor-driven state (Lumen in the production fleet), proxies
-  such as prosody, expression, or heart-rate-variability deltas
-  would populate a $\deta^{\text{aff}}$ channel. This is
-  instrumentable but not currently wired into the governance
-  server.
-\item[Ethical / value drift.] Deviation from a declared value
-  specification (constitutional statements, stated policies,
-  human preferences) would populate a $\deta^{\text{val}}$
-  channel. This is genuinely normative and would require a
-  reference specification that UNITARES does not presently
-  maintain.
-\end{description}
-
-Both are natural extensions to the vector defined below; both are
-out of scope for the present paper. The remainder of this section
-grounds the behavioral--epistemic vector in four measurable signals,
-each bounded in $[0,1]$.
+vector is a deliberately behavioral--epistemic quantity.
+Affective and value-level drift are distinct channels that a
+complete treatment would add; we discuss those as future work at
+the end of this section. The remainder of this section grounds
+the behavioral--epistemic vector in four measurable signals, each
+bounded in $[0,1]$.
 
 \begin{remark}[Information-theoretic re-derivations]
 Under the information-theoretic frame of \Cref{sec:grounding},
@@ -1100,6 +1108,26 @@ parameters, $\gamma_E = 0.05$ while $\lambda_1 \in [0.05, 0.20]$,
 so the entropy response dominates the energy excitation for any
 $\norm{\deta} > 0$.
 \end{remark}
+
+\subsection{Future Channels}
+
+Two adjacent drift channels a complete treatment would add as
+distinct axes, which the present vector does \emph{not}
+instrument, are:
+
+\begin{description}
+\item[Affective drift.] For embodied agents with sensor-driven
+  state (Lumen in the production fleet), proxies such as prosody,
+  expression, or heart-rate-variability deltas would populate a
+  $\deta^{\text{aff}}$ channel. This is instrumentable but not
+  currently wired into the governance server.
+\item[Value-level drift.] Deviation from a declared value
+  specification (constitutional statements, stated policies,
+  human preferences) would populate a $\deta^{\text{val}}$
+  channel. This is genuinely normative and would require a
+  reference specification that UNITARES does not presently
+  maintain.
+\end{description}
 
 
 % ═══════════════════════════════════════════════════════════
@@ -1238,28 +1266,19 @@ shows their healthy envelopes are statistically indistinguishable;
 subsequent work will report which tag-grouped classes met that
 condition in the production corpus.
 
-\begin{remark}[Cold-start homogenization: a bootstrapping trade-off, not a steady-state property]
+\begin{remark}[Cold-start: a bootstrapping window]
 \label{rem:cold-start}
-The fallback-to-$\Sigma(c_{\text{default}})$ behavior during
-the first $N_{\min}$ turns of a new class's existence is, formally,
-the homogenization failure mode of \Cref{sec:heterogeneity}
-applied to that single class: the class is being governed against
-a fleet-wide envelope while its own is still being measured. We
-do not claim this is costless. We do claim it is a bounded-duration
-bootstrapping choice rather than a steady-state commitment:
-(i)~the provenance tag $\rho = \text{placeholder}$ makes the
-regime explicit in every check-in payload; (ii)~once the class
-has accumulated $N_{\min}$ healthy turns, the measurement pipeline
-transitions the provenance to \texttt{measured} and the class
-exits the homogenization regime; (iii)~operators deploying a new
-class with known-different tempo or modality are encouraged to
+During the first $N_{\min}$ turns of a new class, the
+fallback-to-$\Sigma(c_{\text{default}})$ behavior is, formally,
+fleet-wide normalization applied to that single class. This is a
+bounded-duration bootstrapping window, not a steady-state
+commitment: the provenance tag $\rho = \text{placeholder}$ makes
+the regime explicit in every check-in payload, and once the class
+accumulates $N_{\min}$ healthy turns the measurement pipeline
+transitions the provenance to \texttt{measured}. Operators
+deploying a new class with known-different tempo or modality can
 hand-author an initial $\Sigma(c)$ with provenance
-\texttt{derived} rather than inherit defaults, and the framework
-exposes this as a supported entry path. The tension the critic
-identifies is real: a class in its cold-start window is \emph{not}
-enjoying the benefits of class-conditional governance. The
-framework's response is to make that state observable rather than
-to paper over it.
+\texttt{derived} to skip the window entirely.
 \end{remark}
 
 \subsection{What This Buys}
@@ -1358,51 +1377,13 @@ not compromise governance decisions. The result follows directly from
 Pham et~al.~\cite{pham2009stochastic}.
 \end{remark}
 
-\subsection{Beyond Mean-Square Contraction: What a Fokker--Planck Treatment Would Add}
-\label{sec:fp-gap}
-
 The mean-square bound of \Cref{thm:stochastic} is a worst-case
-contraction statement. It does not produce a verdict-level
-false-alarm rate. The sharper operational question---\emph{given
-an agent in the healthy regime, what is the probability that
-stochastic excursions cross the governance threshold
-$\Phi < 0$ and trigger a spurious pause verdict?}---requires the
-stationary distribution of the SDE.
-
-The Fokker--Planck equation for $p(\eisv, t)$ under
-\Cref{eq:sde} is
-\[
-  \partial_t p = -\nabla \cdot (f\,p)
-  + \tfrac{1}{2}\sum_{i,j} \partial_i \partial_j(D_{ij}\,p),
-  \qquad D = G G^\top.
-\]
-With the production diffusion $G = \operatorname{diag}(0,0,\sigma,0)$,
-the noise is injected only on the $S$ channel, so $D$ has a single
-non-zero entry $D_{SS} = \sigma^2$. The stationary distribution
-$p_{\ast}(\eisv) = \lim_{t \to \infty} p(\eisv, t)$---once
-derived---would enable direct computation of
-\[
-  P_{\text{FA}}
-  = \int_{\{\eisv : \Phi(\eisv) < 0\}} p_{\ast}(\eisv)\, d\eisv,
-\]
-the false-alarm rate at the \texttt{pause} boundary for an agent
-whose deterministic trajectory sits in the healthy basin. Related
-FP frameworks for LLM drift~\cite{carson2025stochastic} give
-closed-form first-passage times for one-dimensional severity
-processes.
-
-We do not carry out the 4-D Fokker--Planck derivation here. The
-deterministic contraction analysis shows variance is bounded; the
-empirical verdict-flip counterfactual in \Cref{sec:experiments}
-shows the class-conditional form changes verdicts at the population
-level; a proper $P_{\text{FA}}$ bound requires either an analytical
-FP treatment under a suitable reduction (e.g., marginalizing to
-the $S$ subsystem that actually carries the noise, where the FP
-equation is one-dimensional and tractable) or a numerical
-integration of the SDE trajectory ensemble against the governance
-threshold. Either is substantial enough work to be its own
-paper; we flag it here as the sharpest remaining rigor gap in the
-present treatment.
+contraction statement; a verdict-level false-alarm rate
+$P_{\text{FA}} = \int_{\{\Phi(\eisv) < 0\}} p_\ast(\eisv)\, d\eisv$
+requires the stationary distribution of the SDE and is deferred
+to subsequent work. Related Fokker--Planck frameworks for LLM
+drift~\cite{carson2025stochastic} give closed-form first-passage
+times for one-dimensional severity processes.
 
 
 % ═══════════════════════════════════════════════════════════
@@ -1662,24 +1643,6 @@ actionable governance outputs.}
 \subsection{Phase~2 Measurement: Per-Class Envelopes}
 \label{sec:phase-2-measurement}
 
-\textbf{A note on temporal seam.} The fleet-aggregate equilibrium
-statistics in \Cref{tab:eisv-observed} were measured on a snapshot
-of February~20,~2026; the per-class measurement in this
-subsection and the verdict counterfactual in
-\Cref{sec:verdict-counterfactual} were measured on a 30-day
-window ending April~18,~2026. Both draw from the same
-continuously-running deployment, but the populations have grown
-(903~$\to$~3{,}286 registered identities) over the interval. We
-report both measurements honestly because the older snapshot
-underlies the reported fleet-aggregate statistics and the newer
-one underlies the per-class measurement; reconciling them to a
-single date would require either re-deriving the fleet-aggregate
-statistics on April~18 (which would invalidate the prior
-discussion in \Cref{sec:experiments}) or running the per-class
-measurement on the smaller February snapshot (where some classes
-would fall below $N_{\min}$). The temporal seam is real and
-acknowledged.
-
 The Phase~2 calibration protocol of \Cref{sec:class-calibration}
 was executed against a $30$-day healthy-regime slice of
 \texttt{core.agent\_state} on April~18,~2026. \Cref{tab:per-class}
@@ -1873,6 +1836,12 @@ our empirical claims:
   results for the 75 agents with $>5$ updates to mitigate this, but
   acknowledge that even this filtered set spans multiple configuration
   epochs.
+\item \textbf{Temporal seam:} Fleet-aggregate statistics
+  (\Cref{tab:eisv-observed}) are from a February~20,~2026 snapshot;
+  per-class envelopes (\Cref{sec:phase-2-measurement}) and the
+  verdict counterfactual (\Cref{sec:verdict-counterfactual}) are
+  from a 30-day window ending April~18,~2026, during which the
+  population grew from 903 to 3{,}286 registered identities.
 \end{enumerate}
 
 
