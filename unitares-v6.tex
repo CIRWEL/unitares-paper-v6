@@ -262,6 +262,12 @@ finite-state-machine conformance engines and goal-conditioned drift
 detection. UNITARES differs in representation: where MI9 tracks
 conformance to an FSM, UNITARES maintains a continuous four-dimensional
 dynamical state whose evolution itself carries the governance signal.
+ProbGuard~\cite{probguard2025} takes a probabilistic
+model-checking route, modeling agent behavior as a discrete-time
+Markov chain and verifying safety properties against a PRISM
+specification; UNITARES operates in a continuous state space
+with no external property specification, and its governance signal
+is the state itself rather than a conformance verdict.
 Rath~\cite{rath2026agentdrift} independently proposes an Agent
 Stability Index over multi-agent LLM systems as a composite metric;
 UNITARES's behavioral--epistemic drift vector (\Cref{sec:ethical-drift}) couples
@@ -564,13 +570,12 @@ unnecessary caution for well-functioning agents.
 The \eisv\ system presented in \Cref{sec:dynamics} is
 phenomenological: each coordinate has a physical interpretation and the
 coupling structure is thermodynamically motivated, but the coordinates
-are not themselves thermodynamic quantities. This is an honest
-framing---we state it plainly in
-\Cref{sec:thermodynamic-connections}---but it leaves every constant
-hand-tuned and every threshold empirically discovered rather than
-derived. This section upgrades the phenomenology to a computable
-information-theoretic grounding without changing the dynamics of
-\Cref{sec:equations}.
+are not themselves thermodynamic quantities---the analogy was a
+labeling convenience, not a derivation. The phenomenological form
+leaves every constant hand-tuned and every threshold empirically
+discovered rather than derived. This section upgrades the
+phenomenology to a computable information-theoretic grounding
+without changing the dynamics of \Cref{sec:equations}.
 
 \begin{remark}[What stays, what changes]
 The ODE structure in \Cref{eq:dE,eq:dI,eq:dS,eq:dV}, the contraction
@@ -599,6 +604,27 @@ information geometry with Fisher metric (more machinery than the
 framework needs at this stage); pure statistical mechanics with a
 partition function (requires defining a Hamiltonian analog for agent
 behavior, which is itself arbitrary at the choice of Hamiltonian).
+
+The resulting correspondence between each coordinate and its
+information-theoretic referent is:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Information / FEP quantity} & \textbf{Coord.} \\
+\midrule
+Shannon entropy of $q(y \mid x)$        & $S$ \\
+Mutual information $\mathrm{MI}(x; y)$  & $I$ \\
+Negative variational free energy $-F$   & $E$ \\
+Accumulated free-energy residual        & $V$ \\
+KL / manifold distance from healthy     & $C$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The symbols $\{E, I, S, V, C\}$ are retained for continuity with
+deployed systems; their semantic load is now the right column.
 
 \subsection{Quantity Redefinitions}
 
@@ -708,61 +734,13 @@ ships placeholder values tagged explicitly; Phase~2 replaces them
 with measured values per the protocol in the implementation plan
 with results reported in subsequent work.
 
-\subsection{Heterogeneity as a First-Class Constraint}
-\label{sec:grounding-heterogeneity}
-
-The framework must not collapse to fleet-wide constants. The
-deployments that motivate UNITARES are explicitly heterogeneous: an
-embodied creature reading I$^2$C sensors at $0.5$ Hz, a cron-driven
-janitorial agent that wakes once per 30 minutes, an analytical
-observer that streams over a websocket, a session-bounded coding
-assistant generating tokens at $40$--$80$ Hz, and ephemeral
-parser agents that exist for milliseconds. These do not share a
-healthy operating point. They do not share a tempo. Their
-``outputs'' are not in the same units---an embodied agent's $E$
-should not be normalized against a tokenizer's throughput envelope.
-
-Phase~1 ships fleet-wide constants explicitly tagged
-\texttt{provenance="placeholder"}; this is a scaffolding choice, not
-a claim. The framework's normalization layer must in production be
-\emph{class-conditional}: scale constants and the healthy baseline
-point $(E,I,S)_{\text{healthy}}$ are functions of an agent class,
-not global parameters. UNITARES already carries the keying material
-for class assignment via existing identity tags
-($\texttt{embodied}$, $\texttt{autonomous}$, $\texttt{persistent}$,
-$\texttt{ephemeral}$, etc.) and labels (e.g., \texttt{Lumen},
-\texttt{Vigil}, \texttt{Sentinel}); Phase~2 calibration partitions
-the reference corpus along these axes and computes class-conditional
-constants. The default for an unclassified agent is the
-fleet-wide constant, retained as a safe fallback.
-
-\begin{remark}[Why this matters]
-A coherence baseline computed across a homogenized fleet is the
-information-theoretic equivalent of a cosmological soup: maximally
-entropic, no class structure, no distinguishability. A divergent
-agent (high $S$ by design) flagged as incoherent against an
-analytical baseline is not a governance signal---it is a category
-error introduced by the choice of $\norm{\Delta}_{\max}$. The
-subsequent work will report
-class-conditional values and the population structure they
-induce.
-\end{remark}
-
 \subsection{Dual-Compute Migration}
 
-Phase~1 is \emph{dual-compute}: every check-in reports both the
-grounded value (under canonical symbols $E, I, S, C$) and the
-legacy value (under $E_{\text{legacy}}$, etc.), with source
-annotations on each grounded coordinate
-(\texttt{e\_source}, \texttt{i\_source}, \texttt{s\_source},
-\texttt{coherence\_source}) identifying which tier produced the
-value. Governance decisions---verdicts,
-basin classification, risk thresholds---continue to read the legacy
-values, which is enforced by the pipeline: gating runs before the
-grounding enrichment in the server's request pipeline. Phase~2
-measures divergence between grounded and legacy on the reference
-corpus. Phase~3 migrates gating to the grounded values once
-divergence is characterized.
+The grounded coordinates ship alongside the legacy quantities in
+a three-phase migration so the deployed governance surface is
+never broken mid-flight. \Cref{sec:migration} documents the
+mechanism; for the remainder of this section we treat the
+grounded definitions as the semantic commitment of the framework.
 
 \begin{remark}[What the paper's §2 equations mean after grounding]
 The equations in \Cref{sec:equations} keep their shape. A
@@ -2334,53 +2312,6 @@ relying on clamping to maintain invariance.
   or LQR methods is future work.
 \end{enumerate}
 
-\subsection{Why We Left Thermodynamics}
-\label{sec:thermodynamic-connections}
-
-Earlier UNITARES formulations
-\cite{wang2026unitares-v3,wang2026unitares-v5} described the EISV state vector as
-``thermodynamic'' on the strength of an analogy: $E$ resembled
-internal energy, $S$ resembled entropy, $V$ resembled Helmholtz
-free energy. This paper deliberately abandons that framing. The
-analogy was a labeling convenience, not a derivation; no
-thermodynamic law (conservation, second law, fluctuation-dissipation)
-held in the EISV equations, and continuing to invoke
-thermodynamic vocabulary risked claiming structure that the math
-did not support.
-
-The grounded coordinates of \Cref{sec:grounding} are
-information-theoretic. Their formal ancestry is Shannon
-information theory \cite{shannon1948} and the variational
-free-energy principle \cite{friston2010free}---both of which have
-genuine derivations from probability theory and statistical
-mechanics respectively. The two ancestries connect: Friston's
-free energy is itself a Helmholtz-style quantity arising from
-variational Bayes, so $V$ as accumulated free-energy debt
-(\Cref{eq:V-grounded}) shares mathematical heritage with
-Helmholtz free energy without requiring us to claim a direct
-thermodynamic mapping. The honest correspondence is now:
-
-\begin{center}
-\footnotesize
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Information / FEP quantity} & \textbf{Coord.} \\
-\midrule
-Shannon entropy of $q(y \mid x)$        & $S$ \\
-Mutual information $\mathrm{MI}(x; y)$  & $I$ \\
-Negative variational free energy $-F$   & $E$ \\
-Accumulated free-energy residual        & $V$ \\
-KL / manifold distance from healthy     & $C$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-We retain the symbols
-$\{E, I, S, V, C\}$ for continuity with prior UNITARES work and
-deployment compatibility, but their semantic load is now the
-right column.
-
-
 % ═══════════════════════════════════════════════════════════
 \section{Conclusion}
 \label{sec:conclusion}
@@ -2414,14 +2345,11 @@ appear in \Cref{sec:experiments}; class-conditional empirical
 results are deferred to subsequent work following the
 measurement protocol of \Cref{sec:class-calibration}.
 
-The framework's adaptive governor (\Cref{sec:governor}), ethical
+The framework's adaptive governor (\Cref{sec:governor}),
 behavioral--epistemic drift vector (\Cref{sec:ethical-drift}), and multi-agent
 extensions (\Cref{sec:network}) carry over from earlier
-formulations. The honest accounting of what changed and what was
-preserved appears in
-\Cref{sec:thermodynamic-connections}: we kept the
-$\{E, I, S, V, C\}$ symbols and the dynamics; we replaced what
-they mean and how they are normalized.
+formulations. We kept the $\{E, I, S, V, C\}$ symbols and the
+dynamics; we replaced what they mean and how they are normalized.
 
 As autonomous AI agents become more prevalent, governance
 frameworks must accommodate the heterogeneity of the populations
@@ -2570,6 +2498,12 @@ K.~It\^{o}.
 R.~Landauer.
 \newblock Irreversibility and heat generation in the computing process.
 \newblock \emph{IBM Journal of Research and Development}, 5(3):183--191, 1961.
+
+\bibitem[ProbGuard(2025)]{probguard2025}
+ProbGuard.
+\newblock Probabilistic runtime monitoring of {LLM} agents via {DTMC}
+  model checking.
+\newblock \emph{arXiv preprint arXiv:2508.00500}, 2025.
 
 \end{thebibliography}
 
