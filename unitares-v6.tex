@@ -247,14 +247,20 @@ state that evolves between actions, providing leading indicators of
 degradation rather than binary verdicts after the fact.
 
 Ravindran~\cite{ravindran2025moral} proposes a Moral Anchor System
-(MAS) that detects value drift using a three-dimensional state vector
-with Bayesian inference and LSTM-based forecasting. While MAS and
-UNITARES share the goal of detecting value-level drift, they differ
-fundamentally: MAS is a statistical detection pipeline that predicts
-drift from observed behavior, whereas UNITARES models drift as a
-dynamical force that couples into the state equations, providing
-contraction-theoretic stability guarantees that statistical methods
-cannot offer.
+(MAS) that detects value drift using a three-dimensional state
+vector with Bayesian inference and LSTM-based forecasting. The
+differentiation is twofold. First, \emph{scope}: MAS targets
+\emph{value}-level drift against a declared value specification,
+while UNITARES's behavioral--epistemic drift vector
+(\Cref{sec:ethical-drift}) explicitly does not measure values---the
+four components instrument decision consistency, coherence departure,
+calibration gap, and complexity self-estimation error. The two
+vectors are complementary channels, not competing formulations.
+Second, \emph{coupling}: MAS is a statistical detection pipeline
+that predicts drift from observed behavior; UNITARES couples drift
+into the state equations themselves via the $\norm{\Delta\bm\eta}$
+term in \Cref{eq:dE,eq:dS}, so drift acts as a forcing on the
+governed dynamics rather than as an external signal.
 
 Concurrent work on runtime governance for agentic systems includes
 MI9~\cite{wang2025mi9}, which combines an agency-risk index with
@@ -262,6 +268,12 @@ finite-state-machine conformance engines and goal-conditioned drift
 detection. UNITARES differs in representation: where MI9 tracks
 conformance to an FSM, UNITARES maintains a continuous four-dimensional
 dynamical state whose evolution itself carries the governance signal.
+ProbGuard~\cite{wang2025probguard} takes a probabilistic
+model-checking route, modeling agent behavior as a discrete-time
+Markov chain and verifying safety properties against a PRISM
+specification; UNITARES operates in a continuous state space
+with no external property specification, and its governance signal
+is the state itself rather than a conformance verdict.
 Rath~\cite{rath2026agentdrift} independently proposes an Agent
 Stability Index over multi-agent LLM systems as a composite metric;
 UNITARES's behavioral--epistemic drift vector (\Cref{sec:ethical-drift}) couples
@@ -508,19 +520,19 @@ operational form is
 \end{equation}
 with $C_{\max} = 1$ and $C_1 = 1.0$ (production values). This
 maps $V \in \R \to [0, C_{\max}]$ with the steepest sensitivity
-at $V = 0$. The dual presentation reflects the dual-compute
-migration of \Cref{sec:migration}: the grounded form is reported
-in canonical payload slots; the operational form remains the
-quantity the dynamics consume until the Phase~3 swap migrates the
-ODE coefficients onto the grounded coherence.
+at $V = 0$. The dynamics consume the operational form; the
+grounded form is reported in canonical payload slots.
+\Cref{sec:migration} documents the retirement sequence for the
+operational form.
 
 \begin{remark}[Operating Range]
 \label{rem:operating-range}
 In production, the damping term $\delta V$ in \eqref{eq:dV} constrains
-$V$ to approximately $[-0.1, 0.1]$, yielding $C(V) \approx 0.49$. This
-narrow operating range is not a deficiency but an honest signal: the
-system operates conservatively with integrity consistently exceeding
-energy ($I > E$).
+$V$ to approximately $[-0.1, 0.1]$, yielding $C(V) \approx 0.49$; the
+empirical distribution is reported in \Cref{sec:experiments}. The
+narrow range near the coherence-function midpoint is the operational
+consequence of the damping analysis rather than a deficiency of the
+signal.
 \end{remark}
 
 \subsection{Adaptive Entropy Coupling}
@@ -564,13 +576,12 @@ unnecessary caution for well-functioning agents.
 The \eisv\ system presented in \Cref{sec:dynamics} is
 phenomenological: each coordinate has a physical interpretation and the
 coupling structure is thermodynamically motivated, but the coordinates
-are not themselves thermodynamic quantities. This is an honest
-framing---we state it plainly in
-\Cref{sec:thermodynamic-connections}---but it leaves every constant
-hand-tuned and every threshold empirically discovered rather than
-derived. This section upgrades the phenomenology to a computable
-information-theoretic grounding without changing the dynamics of
-\Cref{sec:equations}.
+are not themselves thermodynamic quantities---the analogy was a
+labeling convenience, not a derivation. The phenomenological form
+leaves every constant hand-tuned and every threshold empirically
+discovered rather than derived. This section upgrades the
+phenomenology to a computable information-theoretic grounding
+without changing the dynamics of \Cref{sec:equations}.
 
 \begin{remark}[What stays, what changes]
 The ODE structure in \Cref{eq:dE,eq:dI,eq:dS,eq:dV}, the contraction
@@ -599,6 +610,27 @@ information geometry with Fisher metric (more machinery than the
 framework needs at this stage); pure statistical mechanics with a
 partition function (requires defining a Hamiltonian analog for agent
 behavior, which is itself arbitrary at the choice of Hamiltonian).
+
+The resulting correspondence between each coordinate and its
+information-theoretic referent is:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Information / FEP quantity} & \textbf{Coord.} \\
+\midrule
+Shannon entropy of $q(y \mid x)$        & $S$ \\
+Mutual information $\mathrm{MI}(x; y)$  & $I$ \\
+Negative variational free energy $-F$   & $E$ \\
+Accumulated free-energy residual        & $V$ \\
+KL / manifold distance from healthy     & $C$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The symbols $\{E, I, S, V, C\}$ are retained for continuity with
+deployed systems; their semantic load is now the right column.
 
 \subsection{Quantity Redefinitions}
 
@@ -708,61 +740,13 @@ ships placeholder values tagged explicitly; Phase~2 replaces them
 with measured values per the protocol in the implementation plan
 with results reported in subsequent work.
 
-\subsection{Heterogeneity as a First-Class Constraint}
-\label{sec:grounding-heterogeneity}
-
-The framework must not collapse to fleet-wide constants. The
-deployments that motivate UNITARES are explicitly heterogeneous: an
-embodied creature reading I$^2$C sensors at $0.5$ Hz, a cron-driven
-janitorial agent that wakes once per 30 minutes, an analytical
-observer that streams over a websocket, a session-bounded coding
-assistant generating tokens at $40$--$80$ Hz, and ephemeral
-parser agents that exist for milliseconds. These do not share a
-healthy operating point. They do not share a tempo. Their
-``outputs'' are not in the same units---an embodied agent's $E$
-should not be normalized against a tokenizer's throughput envelope.
-
-Phase~1 ships fleet-wide constants explicitly tagged
-\texttt{provenance="placeholder"}; this is a scaffolding choice, not
-a claim. The framework's normalization layer must in production be
-\emph{class-conditional}: scale constants and the healthy baseline
-point $(E,I,S)_{\text{healthy}}$ are functions of an agent class,
-not global parameters. UNITARES already carries the keying material
-for class assignment via existing identity tags
-($\texttt{embodied}$, $\texttt{autonomous}$, $\texttt{persistent}$,
-$\texttt{ephemeral}$, etc.) and labels (e.g., \texttt{Lumen},
-\texttt{Vigil}, \texttt{Sentinel}); Phase~2 calibration partitions
-the reference corpus along these axes and computes class-conditional
-constants. The default for an unclassified agent is the
-fleet-wide constant, retained as a safe fallback.
-
-\begin{remark}[Why this matters]
-A coherence baseline computed across a homogenized fleet is the
-information-theoretic equivalent of a cosmological soup: maximally
-entropic, no class structure, no distinguishability. A divergent
-agent (high $S$ by design) flagged as incoherent against an
-analytical baseline is not a governance signal---it is a category
-error introduced by the choice of $\norm{\Delta}_{\max}$. The
-subsequent work will report
-class-conditional values and the population structure they
-induce.
-\end{remark}
-
 \subsection{Dual-Compute Migration}
 
-Phase~1 is \emph{dual-compute}: every check-in reports both the
-grounded value (under canonical symbols $E, I, S, C$) and the
-legacy value (under $E_{\text{legacy}}$, etc.), with source
-annotations on each grounded coordinate
-(\texttt{e\_source}, \texttt{i\_source}, \texttt{s\_source},
-\texttt{coherence\_source}) identifying which tier produced the
-value. Governance decisions---verdicts,
-basin classification, risk thresholds---continue to read the legacy
-values, which is enforced by the pipeline: gating runs before the
-grounding enrichment in the server's request pipeline. Phase~2
-measures divergence between grounded and legacy on the reference
-corpus. Phase~3 migrates gating to the grounded values once
-divergence is characterized.
+The grounded coordinates ship alongside the legacy quantities in
+a three-phase migration so the deployed governance surface is
+never broken mid-flight. \Cref{sec:migration} documents the
+mechanism; for the remainder of this section we treat the
+grounded definitions as the semantic commitment of the framework.
 
 \begin{remark}[What the paper's §2 equations mean after grounding]
 The equations in \Cref{sec:equations} keep their shape. A
@@ -824,22 +808,21 @@ within-class property, as already qualified in \Cref{sec:network};
 fleet-wide synchronization across heterogeneous classes is not
 claimed and would not be expected.
 
-\begin{remark}[Phase 3 re-certification]
+\begin{remark}[Contraction under a grounded coherence]
 \label{rem:phase3-contraction}
-Phases 1 and 2 (\Cref{sec:migration}) preserve the operational
-$\cv = \tanh$-based form that the contraction proof of
-\Cref{app:contraction-proof} consumes through the off-diagonal
-bound $\beta_I C'_{\max} = 0.15$. In Phase 3, the dynamics
-themselves are rewired to consume a grounded coherence
-(\Cref{eq:C-manifold} or \Cref{eq:C-KL}), which changes the
-relevant Jacobian entries: $\partial \cv / \partial V$ is replaced
-by derivatives with respect to $(E, I, S)$, altering the structure
-of the off-diagonal bound on which the Gershgorin argument
-depends. The contraction certificate therefore does not carry over
-to Phase 3 unconditionally; re-certification at the new operating
-point with the new coherence derivative is required. The proof
-structure of \Cref{app:contraction-proof} adapts, but the
-numerical rate $\alpha_c$ will change.
+The contraction proof of \Cref{app:contraction-proof} consumes
+the operational $\cv = \tanh$-based form through the off-diagonal
+bound $\beta_I C'_{\max} = 0.15$. A deployment that rewires the
+dynamics to consume a grounded coherence (\Cref{eq:C-manifold} or
+\Cref{eq:C-KL}) directly replaces $\partial \cv / \partial V$ by
+derivatives with respect to $(E, I, S)$, altering the off-diagonal
+bound on which the Gershgorin argument depends. Re-certification
+at the new operating point with the new coherence derivative is
+required; the proof structure adapts but the numerical rate
+$\alpha_c$ will change. The migration sequence of
+\Cref{sec:migration} is designed so this rewiring is the final
+step, preserving the deployed contraction certificate until it
+is replaced.
 \end{remark}
 
 
@@ -1394,154 +1377,6 @@ The contribution of this section is the protocol, not the
 specific numbers. The numbers belong to the empirical
 appendix that lands with Phase 2 calibration; the protocol is a
 design commitment that survives any specific fleet composition.
-
-
-% ═══════════════════════════════════════════════════════════
-\section{Re-Grounding a Deployed Framework}
-\label{sec:migration}
-
-Re-grounding the EISV state vector raised an engineering problem
-distinct from the mathematical one. The framework was already in
-production: governance verdicts were being issued, dashboards were
-displaying live metrics, calibration data was accumulating, and
-external clients had pinned their integrations against the
-existing payload schema. We needed to introduce computable grounded
-quantities without invalidating any of this. This section documents
-the mechanism that enabled the migration; we believe it
-generalizes to any deployed agent framework whose semantics need
-to shift while service continues.
-
-\subsection{Three-Phase Dual-Compute}
-
-The migration runs in three discrete phases:
-
-\begin{description}
-\item[Phase 1: Dual-compute.]
-  Every check-in computes both the grounded value and the legacy
-  value. Grounded values land in canonical
-  $\{E, I, S, C\}$ slots; legacy values are preserved in
-  $\{E_{\text{legacy}}, I_{\text{legacy}}, S_{\text{legacy}},
-  C_{\text{legacy}}\}$. Source annotations on each grounded
-  coordinate (\texttt{e\_source}, \texttt{i\_source},
-  \texttt{s\_source}, \texttt{coherence\_source}) identify which
-  computation tier produced each value (logprob / multisample /
-  heuristic / resource / manifold / KL / FEP).
-\item[Phase 2: Calibration.]
-  Scale constants and class-conditional healthy operating points
-  are measured against a reference corpus of healthy production
-  agent-turns, partitioned by the identity tags of
-  \Cref{sec:class-structure}. Divergence between grounded and
-  legacy values is characterized; the empirical appendix reports
-  the result.
-\item[Phase 3: Migration.]
-  Governance gating (verdicts, basin classification, risk
-  thresholds) switches from legacy to grounded values. The
-  legacy fields remain readable for one minor version as a
-  comparison surface, then are dropped.
-\end{description}
-
-The contribution of this section is not the three-phase shape
-itself---which is standard for any deprecated-API migration---but
-the mechanism by which Phase 1 preserves governance behavior while
-exposing grounded values to downstream consumers.
-
-\subsection{Pipeline-Ordering as a Behavior-Preservation Mechanism}
-\label{sec:pipeline-ordering}
-
-A naive reading of Phase 1 is that grounded values must equal
-legacy values for behavior to be preserved. This is false in
-general: the grounded coherence $C$ under \Cref{eq:C-manifold}
-differs numerically from the legacy
-$\tanh$-based coherence even when computed on identical EISV
-inputs, because the formulas are different. Requiring numerical
-equality would defeat the point of grounding.
-
-The mechanism we use instead is pipeline-ordering. The server's
-\texttt{process\_agent\_update} request pipeline runs in two
-phases: a \emph{phases} phase that computes governance state and
-issues the verdict, and an \emph{enrichments} phase that augments
-the response payload with secondary signals. The enrichments
-phase is registered as an ordered list; entries with lower order
-run first. We register the grounding computation as an enrichment
-at order $75$, downstream of every entry that contributes to the
-verdict and basin classification but upstream of presentation
-enrichments such as the human-readable summary and the broadcaster
-event.
-
-The result: by the time the grounding enrichment runs, the verdict
-has already been computed---using the legacy values produced by
-the phases phase. The grounding enrichment then swaps grounded
-values into the canonical
-$\{E, I, S, C\}$ slots, copying the originals into
-$\{E_{\text{legacy}}, \dots\}$. The response payload carries
-grounded values, but the governance decision was made on legacy.
-No gating code is touched; no consumer reading
-$\{E, I, S, C\}$ sees a missing field; no decision changes during
-Phase 1.
-
-\begin{remark}[Idempotency]
-The enrichment checks for the presence of $E_{\text{legacy}}$
-before swapping; on a second invocation against the same context
-it returns immediately. This guards against double-application in
-testing and during pipeline replay.
-\end{remark}
-
-\subsection{What Doesn't Get Grounded in Phase 1}
-
-The void coordinate $V$ is not dual-computed. As discussed in
-\Cref{sec:grounding}, $V$ is structurally an accumulator; its
-grounded reinterpretation as accumulated free-energy debt
-\Cref{eq:V-grounded} is a relabeling of an existing quantity, not
-a new computation. No source annotation, no $V_{\text{legacy}}$
-twin. The internal naming
-($\texttt{void} \to \texttt{free\_energy\_debt}$ in subsequent
-revisions) is a cosmetic change tracked separately from the
-dual-compute migration.
-
-Tier-1 (logprob-based) and tier-2 (multi-sample) computations are
-present in the codebase as interface stubs that raise
-\texttt{NotImplementedError}; the dispatcher catches and falls
-through to tier-3 (heuristic / resource / manifold). This keeps
-the dispatcher surface stable while the inference-layer
-instrumentation needed to populate logprobs lands separately,
-typically as plugin work outside the governance server.
-
-\subsection{Generalization}
-
-The pipeline-ordering mechanism is reusable for any deployed
-agent framework facing a semantic-coordinate change while service
-continues. The required structure is:
-\begin{enumerate}
-  \item A request pipeline with explicit ordering between
-    decision-producing stages and presentation-producing stages.
-  \item A canonical payload slot for the coordinate being
-    re-grounded.
-  \item Identity (or session) keying that allows audit
-    consumers to tag rows by the migration phase active when the
-    row was produced.
-\end{enumerate}
-Frameworks that conflate decision and presentation into a single
-non-ordered handler cannot apply this mechanism directly; they
-must first separate the two concerns. We argue this separation is
-worth doing independently of any migration: it makes governance
-decisions auditable and presentation choices revisable in
-isolation.
-
-As a concrete second example, consider an RLHF-governed deployment
-whose gating signal is a reward-model score $r(x, y)$ and whose
-operators wish to migrate to a calibrated reward $\tilde{r}(x, y)$
-derived from a revised preference model without changing refusal or
-escalation behavior during the transition. The pipeline structure
-maps directly: the \emph{phases} stage computes the legacy $r$ and
-issues the gate; the \emph{enrichments} stage computes $\tilde{r}$,
-writes it to a canonical \texttt{reward} field, and copies $r$ to
-\texttt{reward\_legacy}. Downstream dashboards and calibration
-pipelines see $\tilde{r}$; refusal logic continues to read $r$. The
-audit log tags each row with the active migration phase, so a
-divergence study over a held-out corpus can characterize where
-$\tilde{r}$ and $r$ would disagree before any Phase 3 cutover. The
-mechanism is identical; only the coordinate being re-grounded
-changes.
 
 
 % ═══════════════════════════════════════════════════════════
@@ -2159,6 +1994,129 @@ our empirical claims:
 
 
 % ═══════════════════════════════════════════════════════════
+\section{Re-Grounding a Deployed Framework}
+\label{sec:migration}
+
+The counterfactual of \Cref{sec:verdict-counterfactual} was
+computable because the framework was instrumented during a live
+migration: grounded and legacy coherence were computed on every
+production check-in over the measurement window, and governance
+gating continued to read the legacy values so no verdict changed
+during measurement. This section documents the mechanism that
+made the comparison possible. We believe it generalizes to any
+deployed agent framework whose coordinate semantics need to shift
+while service continues.
+
+\subsection{Three-Phase Dual-Compute}
+
+The migration runs in three discrete phases:
+
+\begin{description}
+\item[Phase 1: Dual-compute.]
+  Every check-in computes both the grounded value and the legacy
+  value. Grounded values land in canonical
+  $\{E, I, S, C\}$ slots; legacy values are preserved in
+  $\{E_{\text{legacy}}, I_{\text{legacy}}, S_{\text{legacy}},
+  C_{\text{legacy}}\}$. Source annotations on each grounded
+  coordinate (\texttt{e\_source}, \texttt{i\_source},
+  \texttt{s\_source}, \texttt{coherence\_source}) identify which
+  computation tier produced each value (logprob / multisample /
+  heuristic / resource / manifold / KL / FEP).
+\item[Phase 2: Calibration.]
+  Scale constants and class-conditional healthy operating points
+  are measured against a reference corpus of healthy production
+  agent-turns, partitioned by the identity tags of
+  \Cref{sec:class-structure}. Divergence between grounded and
+  legacy values is characterized; the counterfactual of
+  \Cref{sec:verdict-counterfactual} is the first such
+  characterization.
+\item[Phase 3: Migration.]
+  Governance gating (verdicts, basin classification, risk
+  thresholds) switches from legacy to grounded values. The
+  legacy fields remain readable for one minor version as a
+  comparison surface, then are dropped.
+\end{description}
+
+The contribution of this section is not the three-phase shape
+itself---which is standard for any deprecated-API migration---but
+the mechanism by which Phase 1 preserves governance behavior while
+exposing grounded values to downstream consumers.
+
+\subsection{Pipeline-Ordering as a Behavior-Preservation Mechanism}
+\label{sec:pipeline-ordering}
+
+A naive reading of Phase 1 is that grounded values must equal
+legacy values for behavior to be preserved. This is false in
+general: the grounded coherence $C$ under \Cref{eq:C-manifold}
+differs numerically from the legacy
+$\tanh$-based coherence even when computed on identical EISV
+inputs, because the formulas are different. Requiring numerical
+equality would defeat the point of grounding.
+
+The mechanism we use instead is pipeline-ordering. The server's
+\texttt{process\_agent\_update} request pipeline runs in two
+phases: a \emph{phases} phase that computes governance state and
+issues the verdict, and an \emph{enrichments} phase that augments
+the response payload with secondary signals. The enrichments
+phase is registered as an ordered list; entries with lower order
+run first. We register the grounding computation as an enrichment
+at order $75$, downstream of every entry that contributes to the
+verdict and basin classification but upstream of presentation
+enrichments such as the human-readable summary and the broadcaster
+event.
+
+The result: by the time the grounding enrichment runs, the verdict
+has already been computed---using the legacy values produced by
+the phases phase. The grounding enrichment then swaps grounded
+values into the canonical
+$\{E, I, S, C\}$ slots, copying the originals into
+$\{E_{\text{legacy}}, \dots\}$. The response payload carries
+grounded values, but the governance decision was made on legacy.
+No gating code is touched; no consumer reading
+$\{E, I, S, C\}$ sees a missing field; no decision changes during
+Phase 1.
+
+\begin{remark}[Scope of Phase 1]
+$V$ is not dual-computed; its grounded reinterpretation as
+accumulated free-energy debt (\Cref{eq:V-grounded}) is a
+relabeling, not a new computation. Tier-1 (logprob) and tier-2
+(multi-sample) grounding paths are interface stubs that raise
+\texttt{NotImplementedError}, with the dispatcher falling through
+to tier-3; inference-layer instrumentation for tier-1 lands
+separately.
+\end{remark}
+
+\subsection{Generalization}
+
+The pipeline-ordering mechanism is reusable for any deployed
+agent framework facing a semantic-coordinate change while service
+continues. The required structure is: (i) a request pipeline with
+explicit ordering between decision-producing stages and
+presentation-producing stages; (ii) a canonical payload slot for
+the coordinate being re-grounded; (iii) identity (or session)
+keying that allows audit consumers to tag rows by the migration
+phase active when the row was produced.
+Frameworks that conflate decision and presentation into a single
+non-ordered handler must first separate the two concerns---a
+separation worth doing independently of any migration, because it
+makes governance decisions auditable and presentation choices
+revisable in isolation.
+
+As a concrete second example, consider an RLHF-governed deployment
+whose gating signal is a reward-model score $r(x, y)$ and whose
+operators wish to migrate to a calibrated reward $\tilde{r}(x, y)$
+derived from a revised preference model without changing refusal or
+escalation behavior during the transition. The pipeline structure
+maps directly: the \emph{phases} stage computes the legacy $r$ and
+issues the gate; the \emph{enrichments} stage computes $\tilde{r}$,
+writes it to a canonical \texttt{reward} field, and copies $r$ to
+\texttt{reward\_legacy}. Downstream dashboards and calibration
+pipelines see $\tilde{r}$; refusal logic continues to read $r$.
+The mechanism is identical; only the coordinate being re-grounded
+changes.
+
+
+% ═══════════════════════════════════════════════════════════
 \section{Discussion}
 \label{sec:discussion}
 
@@ -2289,33 +2247,6 @@ counterfactual reported in \Cref{sec:experiments}. We defer the
 weight-perturbation verdict-flip study to subsequent work with
 the same infrastructure.
 
-\subsection{Boundary Clamping and Non-Smoothness}
-
-The EISV state is clamped to $\mathcal{X}$ at each integration step,
-introducing non-smoothness at domain boundaries. We address this in
-three ways:
-
-\paragraph{Interior operation.}
-The epistemic humility floor ($S_{\min} = 0.001$) and the contraction
-dynamics ensure that trajectories remain in the interior of
-$\mathcal{X}$ during normal operation. In production, only 19 of 903
-agents (2.1\%) contact the $I = 1$ boundary, all in the CONVERGENCE
-regime with few updates, confirming that interior operation is the norm.
-
-\paragraph{Projected dynamical systems.}
-When boundary contact does occur, the clamping operation implements a
-projection onto the constraint set $\mathcal{X}$. Projected dynamical
-systems preserve contraction properties when the constraint set is
-convex~\cite{lohmiller1998contraction}, which $\mathcal{X}$ (a
-hyperrectangle) is.
-
-\paragraph{Practical monitoring.}
-The saturation diagnostic (\Cref{sec:saturation}) monitors the
-I-channel's distance from the boundary. When $m_{\text{sat}} < 0.1$,
-the system logs a warning and the adaptive governor tightens
-thresholds pre-emptively, preventing boundary contact rather than
-relying on clamping to maintain invariance.
-
 \subsection{Limitations}
 
 \begin{enumerate}
@@ -2333,53 +2264,6 @@ relying on clamping to maintain invariance.
   empirically; optimal gain selection via, e.g., Ziegler-Nichols
   or LQR methods is future work.
 \end{enumerate}
-
-\subsection{Why We Left Thermodynamics}
-\label{sec:thermodynamic-connections}
-
-Earlier UNITARES formulations
-\cite{wang2026unitares-v3,wang2026unitares-v5} described the EISV state vector as
-``thermodynamic'' on the strength of an analogy: $E$ resembled
-internal energy, $S$ resembled entropy, $V$ resembled Helmholtz
-free energy. This paper deliberately abandons that framing. The
-analogy was a labeling convenience, not a derivation; no
-thermodynamic law (conservation, second law, fluctuation-dissipation)
-held in the EISV equations, and continuing to invoke
-thermodynamic vocabulary risked claiming structure that the math
-did not support.
-
-The grounded coordinates of \Cref{sec:grounding} are
-information-theoretic. Their formal ancestry is Shannon
-information theory \cite{shannon1948} and the variational
-free-energy principle \cite{friston2010free}---both of which have
-genuine derivations from probability theory and statistical
-mechanics respectively. The two ancestries connect: Friston's
-free energy is itself a Helmholtz-style quantity arising from
-variational Bayes, so $V$ as accumulated free-energy debt
-(\Cref{eq:V-grounded}) shares mathematical heritage with
-Helmholtz free energy without requiring us to claim a direct
-thermodynamic mapping. The honest correspondence is now:
-
-\begin{center}
-\footnotesize
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Information / FEP quantity} & \textbf{Coord.} \\
-\midrule
-Shannon entropy of $q(y \mid x)$        & $S$ \\
-Mutual information $\mathrm{MI}(x; y)$  & $I$ \\
-Negative variational free energy $-F$   & $E$ \\
-Accumulated free-energy residual        & $V$ \\
-KL / manifold distance from healthy     & $C$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-We retain the symbols
-$\{E, I, S, V, C\}$ for continuity with prior UNITARES work and
-deployment compatibility, but their semantic load is now the
-right column.
-
 
 % ═══════════════════════════════════════════════════════════
 \section{Conclusion}
@@ -2414,14 +2298,11 @@ appear in \Cref{sec:experiments}; class-conditional empirical
 results are deferred to subsequent work following the
 measurement protocol of \Cref{sec:class-calibration}.
 
-The framework's adaptive governor (\Cref{sec:governor}), ethical
+The framework's adaptive governor (\Cref{sec:governor}),
 behavioral--epistemic drift vector (\Cref{sec:ethical-drift}), and multi-agent
 extensions (\Cref{sec:network}) carry over from earlier
-formulations. The honest accounting of what changed and what was
-preserved appears in
-\Cref{sec:thermodynamic-connections}: we kept the
-$\{E, I, S, V, C\}$ symbols and the dynamics; we replaced what
-they mean and how they are normalized.
+formulations. We kept the $\{E, I, S, V, C\}$ symbols and the
+dynamics; we replaced what they mean and how they are normalized.
 
 As autonomous AI agents become more prevalent, governance
 frameworks must accommodate the heterogeneity of the populations
@@ -2532,7 +2413,7 @@ L.~Kuhn, Y.~Gal, and S.~Farquhar.
 \newblock In \emph{ICLR}, 2023.
 \newblock arXiv:2302.09664.
 
-\bibitem[Wang et~al.(2025)]{wang2025mi9}
+\bibitem[Wang et~al.(2025a)]{wang2025mi9}
 C.~L. Wang, T.~Singhal, A.~Kelkar, and J.~Tuo.
 \newblock {MI9} -- agent intelligence protocol: Runtime governance for agentic {AI}
   systems.
@@ -2570,6 +2451,12 @@ K.~It\^{o}.
 R.~Landauer.
 \newblock Irreversibility and heat generation in the computing process.
 \newblock \emph{IBM Journal of Research and Development}, 5(3):183--191, 1961.
+
+\bibitem[Wang et~al.(2025b)]{wang2025probguard}
+H.~Wang, C.~M. Poskitt, J.~Wei, and J.~Sun.
+\newblock {ProbGuard}: Probabilistic runtime monitoring for {LLM} agent
+  safety.
+\newblock \emph{arXiv preprint arXiv:2508.00500}, 2025.
 
 \end{thebibliography}
 
@@ -3009,6 +2896,35 @@ linear mode rollout. We report the snapshot as-is rather than filtering
 to a ``clean'' parameter regime, since the saturation criterion
 (\Cref{prop:saturation}) depends only on the relationship $A > \gamma_I/4$,
 which holds regardless of the agent's configuration history.
+
+
+\section{Boundary Clamping and Non-Smoothness}
+\label{app:boundary-clamping}
+
+The EISV state is clamped to $\mathcal{X}$ at each integration step,
+introducing non-smoothness at domain boundaries. Three mechanisms
+keep the dynamics well-behaved despite this:
+
+\paragraph{Interior operation.}
+The epistemic humility floor ($S_{\min} = 0.001$) and the contraction
+dynamics keep trajectories in the interior of $\mathcal{X}$ during
+normal operation. In production, only $19$ of $903$ agents (2.1\%)
+contact the $I = 1$ boundary, all in the \texttt{CONVERGENCE} regime
+with few updates; interior operation is the norm.
+
+\paragraph{Projected dynamical systems.}
+When boundary contact does occur, the clamping operation implements
+a projection onto the constraint set $\mathcal{X}$. Projected
+dynamical systems preserve contraction properties when the
+constraint set is convex~\cite{lohmiller1998contraction}, which
+$\mathcal{X}$ (a hyperrectangle) is.
+
+\paragraph{Pre-emptive tightening.}
+The saturation diagnostic of \Cref{sec:saturation} monitors the
+I-channel's distance from the boundary. When $m_{\text{sat}} < 0.1$
+the system logs a warning and the adaptive governor tightens
+thresholds pre-emptively, preventing boundary contact rather than
+relying on clamping to maintain invariance.
 
 
 \end{document}
