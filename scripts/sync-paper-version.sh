@@ -114,16 +114,25 @@ apply "$PAPER_REPO/CITATION.cff" \
     "s/^date-released: .*/date-released: ${TODAY}/"
 
 # ─── 2. Paper README.md ─────────────────────────────────────────────────
-# Three reference forms:
-#   (a) "latest tag `paper-vX.Y`"   — the header pointer
-#   (b) "{vX.Y}"                    — bibtex version field
-#   (c) "through `paper-vX.Y`)"     — the range terminal
-# (a) and (c) both match paper-vX.Y but in distinct phrases, so we target
-# each with the surrounding literal to avoid clobbering the range start.
+# Reference forms to update:
+#   (a) "latest tag `paper-vX.Y`"                      — backtick header pointer
+#   (b) "latest tag [`paper-vX.Y`](...)"               — markdown-linked header pointer
+#   (c) "{vX.Y}"                                       — bibtex version field
+#   (d) "through `paper-vX.Y`)"                        — range terminal
+#   (e) "Latest: paper-vX.Y" badge alt-text            — shields.io image label
+#   (f) "latest-paper--vX.Y-" shield URL slug          — shields.io encodes `-` as `--`
+#   (g) "/releases/tag/paper-vX.Y" URL path            — GitHub release link
+# (a)/(b)/(d) all mention the tag but in distinct phrases; each pattern is
+# anchored by its surrounding literal to avoid clobbering historical
+# version-history lines or the range start in "v6.0 through v6.N".
 apply "$PAPER_REPO/README.md" \
     "s/latest tag \`paper-v[0-9]+\.[0-9]+(\.[0-9]+)?\`/latest tag \`${TAG}\`/g" \
+    "s/latest tag \[\`paper-v[0-9]+\.[0-9]+(\.[0-9]+)?\`\]/latest tag [\`${TAG}\`]/g" \
     "s/\{v[0-9]+\.[0-9]+(\.[0-9]+)?\}/{${VERSION}}/g" \
-    "s/through \`paper-v[0-9]+\.[0-9]+(\.[0-9]+)?\`\)/through \`${TAG}\`)/g"
+    "s/through \`paper-v[0-9]+\.[0-9]+(\.[0-9]+)?\`\)/through \`${TAG}\`)/g" \
+    "s/Latest: paper-v[0-9]+\.[0-9]+(\.[0-9]+)?/Latest: ${TAG}/g" \
+    "s/latest-paper--v[0-9]+\.[0-9]+(\.[0-9]+)?-/latest-paper--${VERSION}-/g" \
+    "s|/releases/tag/paper-v[0-9]+\.[0-9]+(\.[0-9]+)?|/releases/tag/${TAG}|g"
 
 # ─── 3. Unitares README.md ──────────────────────────────────────────────
 # Single reference form: "latest: `paper-vX.Y`"

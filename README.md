@@ -4,9 +4,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647159.svg)](https://doi.org/10.5281/zenodo.19647159)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-[![Latest: paper-v6.7](https://img.shields.io/badge/latest-paper--v6.7-brightgreen.svg)](https://github.com/CIRWEL/unitares-paper-v6/releases/latest)
+[![Latest: paper-v6.8](https://img.shields.io/badge/latest-paper--v6.8-brightgreen.svg)](https://github.com/CIRWEL/unitares-paper-v6/releases/latest)
 
-- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (30 pages, latest tag [`paper-v6.7`](https://github.com/CIRWEL/unitares-paper-v6/releases/tag/paper-v6.7))
+- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (30 pages, latest tag [`paper-v6.8`](https://github.com/CIRWEL/unitares-paper-v6/releases/tag/paper-v6.8))
 - 📝 [`unitares-v6.tex`](./unitares-v6.tex) — LaTeX source
 - 🖼 [`figures/`](./figures/) — 6 figures from deployment data (Feb 20, 2026 snapshot; Apr 18, 2026 30-day window)
 - 🗒 [Release history](https://github.com/CIRWEL/unitares-paper-v6/releases) — per-version notes and frozen PDFs
@@ -72,6 +72,7 @@ Required packages: `amsmath`, `amssymb`, `mathtools`, `bm`, `graphicx`, `booktab
 
 Per-release notes and frozen PDFs are on the [GitHub releases page](https://github.com/CIRWEL/unitares-paper-v6/releases). Headline deltas:
 
+- **v6.8** — operational-honesty bump: §12.4 adds a paragraph on the 2026-04-20 KG retrieval rebuild (pre-rebuild semantic scores sat at noise floor; fleet-learning claims now bounded by that era); §12.5 adds item 6 explicitly caveating retrieval-infrastructure and the PR-#54 auto-ephemeral write-bug. Grounded EISV counterfactual unaffected (inputs are `core.agent_state`, not KG content).
 - **v6.7** — drift correction: runtime removed the CIRS v2 neighbor-pressure coupling on 2026-04-17; paper caught up by excising §Multi-Agent Coordination and reframing §Multi-Agent Network as a theoretical extension. §11.6 headline finding unaffected.
 - **v6.6** — added §11.7 identity-system-maturity disclosure; added identity hardening track to §14.5 future work.
 - **v6.5** — submission polish; aligned prose with measured per-class calibration.
