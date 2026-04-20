@@ -6,8 +6,8 @@ authors:
   - family-names: Wang
     given-names: Kenny
     affiliation: "CIRWEL Systems"
-date-released: 2026-04-19
-version: "v6.7"
+date-released: 2026-04-20
+version: "v6.8"
 url: "https://github.com/CIRWEL/unitares-paper-v6"
 license: CC-BY-4.0
 abstract: >

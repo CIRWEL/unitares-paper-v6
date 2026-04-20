@@ -88,11 +88,11 @@ Per-release notes and frozen PDFs are on the [GitHub releases page](https://gith
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.19647159},
   url       = {https://doi.org/10.5281/zenodo.19647159},
-  version   = {v6.7}
+  version   = {v6.8}
 }
 ```
 
-The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.7`) has its own version DOI.
+The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.8`) has its own version DOI.
 
 ## License
 

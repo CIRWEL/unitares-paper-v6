@@ -1655,6 +1655,7 @@ effective damping.}
 \end{figure}
 
 \subsection{Operational Artifacts: Knowledge Graph and Dialectic}
+\label{sec:operational-artifacts}
 
 The governance system has accumulated 500 knowledge graph discoveries
 classified by severity: 238 low, 154 medium, 49 high, and 4 critical.
@@ -1675,6 +1676,26 @@ required human routing. The 45/66 non-resolution rate should
 therefore be read as an upper bound under facilitator load rather
 than as a protocol-level failure rate; a fleet with autonomous
 reviewers would be expected to resolve more readily.
+
+\paragraph{Retrieval infrastructure (April 2026).}
+The knowledge graph's counts above describe \emph{storage}; whether
+agents could \emph{locate} prior discoveries was a separate question.
+A dogfooding review in mid-April 2026 found that semantic retrieval
+over the discovery corpus was returning similarity scores near the
+noise floor across diverse queries, tag filters were post-filter
+rather than ranking signals, and an unlabeled low-threshold fallback
+was returning random-looking results as if they were matches. The
+retrieval layer was rebuilt in a five-phase sequence
+(2026-04-20): an honest-failure-mode fix, a reproducible eval
+harness, a modern embedder (\texttt{BAAI/bge-m3},
+1024-dimensional), and hybrid retrieval via reciprocal rank fusion
+over BM25 and dense scores. Cross-encoder reranking and 1-hop
+typed-edge expansion were landed as opt-in modes; on the current
+corpus size they showed no aggregate gain. The rebuild is
+prerequisite to any empirical claim that relies on agents
+\emph{using} prior discoveries rather than merely \emph{storing}
+them; documentation and baselines live in the governance repository
+under \texttt{docs/plans/2026-04-20-kg-retrieval-rebuild.md}.
 
 \begin{figure}[t]
 \centering
@@ -1915,6 +1936,27 @@ our empirical claims:
   but we have not filtered the counterfactual to post-fix identities;
   a re-measurement on identity-clean data, once sufficient post-fix
   history has accumulated, is deferred to subsequent work.
+\item \textbf{Retrieval infrastructure and write-path hygiene:}
+  Two infrastructure defects predating the measurement window affect
+  how the knowledge-graph counts (\Cref{tab:deployment}) and the
+  dialectic resolution statistics should be read. First, until the
+  April-2026 retrieval rebuild (\Cref{sec:operational-artifacts}),
+  semantic retrieval scored at the noise floor and cross-agent
+  learning was effectively gated by agents knowing a-priori where
+  to look; fleet-learning claims that depend on agents
+  \emph{using} prior discoveries are therefore operationally bounded
+  by that pre-rebuild era. Second, the note-write handler
+  silently auto-tagged every non-permanent discovery with
+  \texttt{ephemeral} until PR \#54 (2026-04-19), which scheduled
+  those notes for 7-day auto-archive; the tag-lifecycle counts in
+  the archived tier thus contain both agent-chosen and
+  handler-injected values in the pre-fix window. Neither defect
+  affects the grounded EISV counterfactual of
+  \Cref{sec:verdict-counterfactual} or the per-class envelopes of
+  \Cref{sec:phase-2-measurement}, whose inputs are
+  \texttt{core.agent\_state} rows rather than KG content; we flag
+  them here because they bound operational claims
+  about the shared-memory surface.
 \end{enumerate}
 
 
