@@ -993,6 +993,27 @@ nuance is better absorbed by the governor than by an additional
 verdict level.
 \end{remark}
 
+\begin{remark}[Runtime labels and audit vocabulary]
+\label{rem:verdict-vocabulary}
+The binary verdict of \Cref{eq:verdict} is the formal contract;
+deployed layers present refined views that map onto it. Runtime
+consumers (the agent-facing MCP surface, documentation, and
+agent-facing skills) expand the verdict into four labels
+\texttt{proceed} / \texttt{guide} / \texttt{pause} /
+\texttt{reject}, where \texttt{guide} is a \texttt{proceed} carrying
+soft advisory text and \texttt{reject} is a \texttt{pause} carrying
+a recovery requirement. The audit schema records a distinct view:
+\texttt{governance.audit.outcome\_events.eisv\_verdict} stores risk
+bands \texttt{safe} / \texttt{caution} / \texttt{high-risk} derived
+from the risk score $R$ of \Cref{eq:phi}, while hard pauses are
+emitted separately as \texttt{lifecycle\_paused} and
+\texttt{lifecycle\_resumed} on \texttt{audit.events}. Readers
+reproducing pause-stream metrics against production data should
+also filter system tasks such as \texttt{eisv-sync-task}, which
+appear in the stream but are scheduled background processes, not
+governed agents.
+\end{remark}
+
 \subsection{Ephemeral Agents and the Sliding Window}
 \label{sec:cirs-ephemeral}
 
