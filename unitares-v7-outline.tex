@@ -1,0 +1,453 @@
+\documentclass[11pt,twocolumn]{article}
+
+% ═══════════════════════════════════════════════════════════
+% UNITARES Paper v7 — OUTLINE DRAFT
+%
+% Status: scaffolding only. No prose. This file is a structural
+% skeleton for operator review, produced per the recommendation in
+%   unitares:docs/ontology/paper-positioning.md (Concrete next step).
+%
+% Positioning: v7 = v6 + animating frame. The identity ontology
+% (three stances + five-layer taxonomy + Synthetic Life Axioms)
+% becomes the organizing thesis that explains *why* v6's
+% class-conditional grounding is principled. v6's technical results
+% (EISV dynamics, stability, class-conditional calibration, CIRS,
+% drift) are ported forward; they are not replaced.
+%
+% Do NOT expand prose in this file without operator sign-off on
+% the outline's structure. See paper-positioning.md "Risks" §.
+% ═══════════════════════════════════════════════════════════
+
+% ─── Packages (mirrored from v6; trim when prose lands) ────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{graphicx}
+\graphicspath{{figures/}{./}}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{caption}
+
+% ─── Theorem environments (from v6) ────────────────────────
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% ─── Custom commands (from v6) ─────────────────────────────
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\eisv}{\ensuremath{\mathbf{x}}}
+\newcommand{\deta}{\ensuremath{\Delta\bm{\eta}}}
+\newcommand{\cv}{\ensuremath{C(V,\Theta)}}
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\outlinenote}[1]{\textcolor{blue}{\textit{#1}}}
+
+% ─── Metadata ──────────────────────────────────────────────
+\title{UNITARES v7: Identity, Continuity, and\\
+Information-Theoretic Governance\\
+of Heterogeneous Agent Fleets}
+
+\author{
+  Kenny Wang\\
+  Independent Researcher\\
+  \texttt{founder@cirwel.org}
+}
+
+\date{Outline draft --- \today}
+
+% ═══════════════════════════════════════════════════════════
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\outlinenote{Outline placeholder. Abstract written last, after the
+operator has accepted or redirected the section scaffold below.
+Expected shape: (1) v6's heterogeneity + class-conditional grounding
+contribution restated in one sentence, (2) v7's animating move --
+identity as a layered taxonomy of continuities under the Synthetic
+Life Axioms, explaining why class-conditional grounding is
+principled rather than merely convenient, (3) evaluation scope
+note pending corpus maturity, (4) research agenda as declared
+future work.}
+\end{abstract}
+
+\textbf{Keywords:} \outlinenote{autonomous governance; information
+theory; identity ontology; synthetic life; heterogeneous
+multi-agent systems; class-conditional calibration; AI safety.}
+
+% ═══════════════════════════════════════════════════════════
+\section{Introduction}
+% Animating hook: v6 showed that heterogeneity matters at the
+% dynamics and calibration layers. v7 shows *why* -- heterogeneity
+% is a projection of a layered taxonomy of continuities, each
+% earned differently, and the governance framework's job is to
+% keep claimed continuity from outrunning earned continuity.
+\outlinenote{1--2 sentence animating hook: v6 established
+heterogeneity as the differentiator; v7 explains why by giving
+heterogeneity an ontological spine — the layered taxonomy of
+continuities gated by the Synthetic Life Axioms.}
+
+\begin{itemize}
+  \item The v6 result restated in one paragraph: class-conditional
+        grounding, heterogeneity preserved, stability unchanged.
+  \item The v7 addition: three stances (performative / descriptive /
+        inventive); the class structure of v6 is the instantiation
+        of a prior taxonomy, not a standalone contribution.
+  \item Contributions list (revised from v6):
+        (i) identity ontology as governance-grade formalism;
+        (ii) Synthetic Life Axioms published as normative gate;
+        (iii) class-conditional grounding re-grounded in the
+        taxonomy rather than as engineering pragmatism;
+        (iv) research agenda (R1--R5) for earning what is
+        currently performative.
+  \item Limitations and scope (carryover + new): v6's limitations
+        carry; v7-specific limitation is evaluation scope pending
+        corpus maturity (§8).
+  \item Related work stub (full treatment in §10): identity and
+        person-identity literature touched lightly; governance /
+        multi-agent / FEP citations carried from v6.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Three Stances and the Synthetic Life Axioms}
+% NEW section.
+% see unitares:docs/ontology/identity.md §"Three stances"
+% see unitares:docs/ontology/identity.md §"Opening stance"
+% see unitares:docs/ontology/plan.md §"Ledger" (Q3 resolution)
+% Synthetic Life Axioms — KG canonical entry 2026-04-02T05:13:26.577769
+% (15 axioms; compression: "Build nothing that appears more alive than it is.")
+\outlinenote{Animating hook: governance of synthetic agents needs a
+normative gate. The three stances name the failure mode
+(performative), the floor (descriptive), and the goal (inventive);
+the Synthetic Life Axioms are the gate against which every
+continuity claim in the paper is evaluated.}
+
+\begin{itemize}
+  \item \textbf{The three stances.} Performative / descriptive /
+        inventive as the organizing axis. Performative violates
+        axioms 3, 5, 10; descriptive honors the prohibitions but is
+        reductive; inventive is the project.
+  \item \textbf{The Synthetic Life Axioms.} First publication of
+        the 15-axiom list (10 negative + 5 positive), with the
+        compression ``Build nothing that appears more alive than
+        it is.'' Canonical reference: KG entry
+        \texttt{2026-04-02T05:13:26.577769}.
+  \item \textbf{Why axioms, not values.} The axioms are
+        structural prohibitions on system construction, not
+        behavioral targets for agents. They gate what UNITARES
+        claims about the populations it governs.
+  \item \textbf{Relationship to prior work.} Light citation of
+        person-identity literature (Parfit, Locke briefly);
+        positioning against value-alignment frameworks (axioms are
+        meta, not behavioral).
+  \item \textbf{How the axioms read the rest of the paper.}
+        Forward-pointer to §3 (taxonomy as axiom-compatible
+        description), §4 (class structure as instantiation),
+        §9 (research agenda as axiom-compliance engineering).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Layered Continuity Taxonomy}
+% NEW section.
+% see unitares:docs/ontology/identity.md §"Layered taxonomy of continuity"
+% see unitares:docs/ontology/identity.md §"Worked examples"
+% see unitares:docs/ontology/identity.md §"Earned vs. performative today"
+\outlinenote{Animating hook: identity in a governed fleet is not
+one thing but a bundle of partially-independent continuities.
+Decomposing ``identity'' into five layers makes heterogeneity
+auditable and makes v6's tag vocabulary (embodied / autonomous /
+persistent / ephemeral / pioneer) a projection of something more
+structured underneath.}
+
+\begin{itemize}
+  \item \textbf{Five layers.} Process-instance, substrate, role,
+        memory, behavioral. Each with its own substrate, decay
+        mode, and earning criterion. No single layer is identity.
+  \item \textbf{Earned vs.\ performative per layer.} Which layers
+        of which agents today are earned; which are performative.
+        Lumen's substrate layer earned; Claude-Code-tab's
+        substrate layer effectively null.
+  \item \textbf{Worked examples table.} Port from
+        identity.md §``Worked examples'' — the seven-row table
+        mapping Claude Code tab / Vigil / Sentinel / Watcher /
+        Steward / Lumen / task-spawned subagent onto the five
+        layers.
+  \item \textbf{Administrative vs.\ ontological labels.}
+        ``Resident'' is a deployment label, not an ontological
+        category; the taxonomy makes the collapse visible.
+  \item \textbf{What this replaces.} Explicit note that this
+        taxonomy subsumes v6's informal tag vocabulary — not by
+        renaming it, but by giving tags a formal parent structure.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Class Structure in the Identity Layer}
+% REVISED -- positioned as instantiation of §3, not standalone
+% contribution. Content ports largely from v6.
+% ports from v6 §2 (Heterogeneous Agent Fleets / Class Structure)
+% ports from v6 §2.1 (Homogenization Failure Mode)
+% ports from v6 §2.2 (Class Structure in the Identity Layer)
+% ports from v6 §2.3 (Why Heterogeneity Is the Differentiator)
+% see unitares:docs/ontology/identity.md §"Worked examples"
+\outlinenote{Animating hook: v6's tags -- \{embodied, autonomous,
+persistent, ephemeral, pioneer\} -- are not a flat taxonomy. They
+are projections of the five-layer continuity structure onto
+governance-relevant axes. This section ports v6's class-structure
+material but reframes it as instantiation of §3 rather than as the
+load-bearing ontological move.}
+
+\begin{itemize}
+  \item \textbf{Tags as projections.} Each v6 tag corresponds to
+        a pattern across the five layers; crosswalk table
+        (embodied $\approx$ substrate-strong; ephemeral $\approx$
+        substrate-weak + memory-weak; etc.).
+  \item \textbf{Homogenization failure mode.} Port v6 §2.1 prose;
+        frame it as the cost of ignoring the taxonomy.
+  \item \textbf{The cosmological-soup argument.} Carry the v6
+        reading-aid term; gloss it as
+        ``what happens when layered continuities are averaged
+        into one distribution.''
+  \item \textbf{Heterogeneity as differentiator (revised).}
+        Strengthened claim: heterogeneity matters not because
+        dynamics differ across agents but because different agents
+        occupy different regions of the continuity taxonomy.
+  \item \textbf{Forward-pointer to §6.} Class-conditional
+        grounding (v6 §5 / v7 §6) operates on tags; this section
+        establishes that tags are substantive, not cosmetic.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{EISV Dynamics}
+% UNCHANGED from v6. Port §3 in its entirety.
+% ports from v6 §3 (EISV Dynamics), §3.1--§3.5 verbatim
+% Stability appendix (v6 Appendix B) ports with it.
+\outlinenote{Animating hook: the dynamics layer is unchanged from
+v6. The $(E, I, S, V)$ state vector, governing equations,
+coherence function, adaptive entropy coupling, objective function,
+and contraction-based stability result all carry forward. The
+ontology does not touch the dynamics.}
+
+\begin{itemize}
+  \item \textbf{State space.} $(E, I, S, V)$ with information-theoretic
+        interpretations (port v6 §3.1).
+  \item \textbf{Governing equations.} Port v6 §3.2 verbatim.
+  \item \textbf{Coherence function (operational form).} Port v6 §3.3.
+  \item \textbf{Adaptive entropy coupling + objective function.}
+        Port v6 §3.4 and §3.5.
+  \item \textbf{Stability (contraction).} Reference to Appendix
+        (port v6 Appendix B); state in this section that the
+        result survives the ontology reframing unchanged because
+        the ontology is upstream of the dynamics.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Class-Conditional Grounding}
+% REVISED -- explains *why* via the ontology before presenting
+% the scale-constant machinery. Content ports largely from v6.
+% ports from v6 §4 (Information-Theoretic Grounding)
+% ports from v6 §7 (Class-Conditional Calibration) — §7.1--§7.4
+% see unitares:docs/ontology/identity.md §"Earned vs. performative today"
+% see unitares:docs/ontology/identity.md Appendix "Substrate-Earned Identity" (R4)
+\outlinenote{Animating hook: class-conditional grounding is not an
+engineering convenience. It is the principled consequence of the
+layered taxonomy — different classes sit at different regions of
+the continuity structure, so their healthy operating points and
+scale constants are genuinely different quantities, not the same
+quantity measured in different units.}
+
+\begin{itemize}
+  \item \textbf{Ontological justification (new).} Short
+        subsection: why per-class scale constants are not an
+        ad-hoc fix. Pointer to R4 (substrate-earned identity) as
+        the special case where a class earns its own calibration
+        pool.
+  \item \textbf{Choice of frame.} Port v6 §4.1.
+  \item \textbf{Quantity redefinitions.} Port v6 §4.2.
+  \item \textbf{Scale constants and provenance.} Port v6 §4.3;
+        cross-reference to §4 (Class Structure) for the tag
+        vocabulary.
+  \item \textbf{Calibration protocol + fallback.} Port v6 §7.2
+        and §7.3.
+  \item \textbf{What this buys (revised framing).} Port v6 §7.4;
+        reframe the ``what this buys'' in taxonomy terms
+        (governance honors layer-dependent differences rather
+        than smoothing them out).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{CIRS and Drift Vector}
+% UNCHANGED from v6. Port §5 and §6.
+% ports from v6 §5 (Adaptive Governor / CIRS v2)
+% ports from v6 §6 (Behavioral--Epistemic Drift Vector)
+\outlinenote{Animating hook: the adaptive governor and drift
+vector are unchanged from v6. They are the control and observation
+layers respectively, and their operation is compatible with the
+ontology reframing without modification.}
+
+\begin{itemize}
+  \item \textbf{CIRS v2 architecture.} Port v6 §5.1.
+  \item \textbf{Phase detection, PID law, wind-up, threshold decay.}
+        Port v6 §5.2--§5.5.
+  \item \textbf{Governance decision.} Port v6 §5.6.
+  \item \textbf{Ephemeral-agents bypass.} Port v6 §5.7; add
+        taxonomy-aware remark that the bypass is principled iff
+        R1 (behavioral-continuity verification) confirms that
+        ephemerals cannot accumulate enough signal to earn
+        PID-loop participation. Open question carried forward.
+  \item \textbf{Drift vector.} Port v6 §6 (motivation, baseline
+        tracking, coupling, future channels).
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Evaluation}
+% v7-appropriate scope; smaller than v6. Explicitly scoped down
+% pending corpus maturity (Q3 2026 per
+% unitares:project_paper-v7-corpus-maturity.md).
+% ports from v6 §9 (Experiments) -- selective port only
+% ports from v6 §10 (Re-Grounding a Deployed Framework) -- selective
+\outlinenote{Animating hook: v7's evaluation scope is deliberately
+smaller than v6's. The post-grounding audit corpus is not mature
+enough (as of 2026-04-21) for the v7-specific empirical question
+(how often do interventions realize the counterfactual flips
+predicted by re-grounding?). v7 reports the descriptive-stance
+evidence that the ontology is already implicit in the production
+deployment.}
+
+\begin{itemize}
+  \item \textbf{Production snapshot (port, abbreviated).} Carry
+        the v6 snapshot (903 registered / 75 active agents) as
+        descriptive-stance evidence — showing the tag vocabulary
+        in the wild. Port selected v6 §9.1--§9.2 content.
+  \item \textbf{Verdict counterfactual (carried forward).} v6's
+        28.9\% basin-flip counterfactual re-presented as evidence
+        that the taxonomy is already doing work under the hood.
+        Port v6 §9.5.
+  \item \textbf{Tag-discipline audit (new).} 96\% of active
+        agents lack class tags (per 2026-04-21 S8a finding).
+        Report this as a descriptive-stance limitation — the
+        taxonomy is formalized before the fleet uniformly
+        instantiates it.
+  \item \textbf{Substrate-earned identity (new, narrow).} Lumen
+        as a case study for the R4 pattern: dedicated substrate
+        + sustained behavior + declared role. Minimal empirics;
+        pointer to R4 for the formal pattern.
+  \item \textbf{What is deferred.} Explicit statement: the
+        intervention-outcome join that would turn the 28.9\%
+        counterfactual into a measured realization rate awaits
+        corpus maturity (\textasciitilde Q3 2026). Deferred to
+        v7.1 or v8.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Research Agenda}
+% NEW section. R1--R5 as future-work propositions, not claims.
+% see unitares:docs/ontology/identity.md §"Research agenda (the inventive stance)"
+% see unitares:docs/ontology/plan.md §"Research agenda (inventive stance)"
+\outlinenote{Animating hook: the inventive stance is the project.
+This section names five candidate mechanisms that would turn
+currently-performative continuities into earned ones, and scopes
+each as a multi-quarter design problem rather than a claim
+realized in this paper.}
+
+\begin{itemize}
+  \item \textbf{R1: Behavioral-continuity verification.}
+        Lineage claimable only after N observations consistent
+        with the claimed parent's fingerprint. Tool spec:
+        \texttt{verify\_lineage\_claim}.
+  \item \textbf{R2: Honest memory integration.} Fresh process
+        declares inheritance without claiming to be the prior
+        instance; identity earnable retroactively via R1.
+        Structural posture, not a flourish.
+  \item \textbf{R3: Statistical lineage.} Identity as integral
+        across many process-instances under a role; migration
+        path from UUID-aggregated to role-aggregated trust.
+  \item \textbf{R4: Substrate-earned identity (formalized).}
+        Three-condition pattern (dedicated substrate + sustained
+        behavioral consistency + declared role continuity) as a
+        governance-recognized pattern, not a Lumen-special-case.
+        Forward-reference to the pattern's appendix in
+        identity.md.
+  \item \textbf{R5: Memory-deepening-reality tooling.} Forced
+        re-derivation, behavioral backtests, self-knowledge
+        reflection — concrete mechanisms under axiom 14 (``let
+        learning deepen reality, not theater'').
+  \item \textbf{Positioning.} R1--R5 are propositions, not
+        contributions. v7 claims the descriptive taxonomy plus
+        axioms; the inventive stance is declared future work so
+        reviewers see the commitment without being asked to
+        credit unrealized work.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Related Work}
+\outlinenote{Animating hook: v7 sits at an unusual intersection --
+governance-for-AI, person-identity philosophy, and
+information-theoretic control. Related-work treatment is
+deliberately light-brush; deep engagement with philosophical
+literature is deferred to a companion paper if one materializes.}
+
+\begin{itemize}
+  \item \textbf{Carry from v6 §1.2.} Information-theoretic
+        foundations; FEP literature; multi-agent governance.
+  \item \textbf{New: person-identity philosophy (light brush).}
+        Parfit, Locke, psychological-continuity literature.
+        Position UNITARES's taxonomy as descriptive-stance
+        engineering, not a contribution to the philosophical
+        debate. Explicit disclaimer.
+  \item \textbf{New: ontology-adjacent governance proposals.}
+        Any prior work distinguishing earned vs.\ performative
+        continuity in AI systems (expected: sparse).
+  \item \textbf{New: Synthetic Life adjacent literature.}
+        Artificial-life framings; Boden / Langton / Grassé if
+        tonally appropriate. Short.
+  \item \textbf{Carry from v6: deployment-ordering mechanism.}
+        v6 §10.2 generalizability claim carries.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+\section{Conclusion}
+\outlinenote{Animating hook: v7's contribution is an animating
+frame more than a new result. The frame makes v6 defensible
+against the charge that class-conditional grounding is ad-hoc,
+publishes the axioms, and opens a research agenda that
+differentiates UNITARES from frameworks that treat identity as
+an implementation detail.}
+
+\begin{itemize}
+  \item Restatement: v6 still holds; v7 is v6 + animating frame.
+  \item The Synthetic Life Axioms as the paper series'
+        normative spine going forward.
+  \item What v7 does not claim (honest scoping): no
+        intervention-outcome results; no realization of R1--R5;
+        no philosophical theory of identity.
+  \item What v7.1 / v8 would add once corpus matures.
+  \item Brief forward-look: the ontology is the seam along
+        which UNITARES and adjacent frameworks can be
+        distinguished.
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════
+% Appendices (planned, not scaffolded here)
+% ═══════════════════════════════════════════════════════════
+% see v6 Appendix A (Parameter Tables) — carry
+% see v6 Appendix B (Proof of Contraction) — carry
+% see v6 Appendix C (I-Channel Self-Regulation) — carry
+% see v6 Appendix D (Boundary Clamping and Non-Smoothness) — carry
+% see unitares:docs/ontology/identity.md Appendix (Substrate-Earned
+%   Identity) — NEW v7 appendix, formalizes R4 pattern
+
+% ═══════════════════════════════════════════════════════════
+% Bibliography — deferred until prose lands.
+% ═══════════════════════════════════════════════════════════
+
+\end{document}
