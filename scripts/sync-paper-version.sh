@@ -21,10 +21,17 @@
 #   5. gh release create paper-vX.Y --latest \
 #          --title "Paper vX.Y: ..." --notes-file <path>
 #
-# Step 5 is load-bearing for citation: Zenodo's GitHub integration mints
-# the version DOI on Release events, NOT on tag pushes. A tag without a
-# corresponding Release leaves the concept DOI pointing at the last
-# properly-released version — the Zenodo badge will silently go stale.
+# Step 5 is load-bearing for citation: the .github/workflows/zenodo-publish.yml
+# workflow triggers on Release events (NOT on tag pushes) and is what mints the
+# new Zenodo version DOI. A tag without a corresponding Release leaves the
+# concept DOI pointing at the last properly-released version — the Zenodo
+# badge will silently go stale.
+#
+# The workflow uploads BOTH the source archive and unitares-v6.pdf as
+# top-level files on Zenodo, so the PDF is previewable directly on the
+# record page (the prior Zenodo-GitHub integration only attached the source
+# zip, burying the PDF inside it). Pre-flight: ensure unitares-v6.pdf is
+# rebuilt and committed at the release tag.
 #
 # Usage:
 #   ./scripts/sync-paper-version.sh v6.7
