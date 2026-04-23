@@ -4,9 +4,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19647159.svg)](https://doi.org/10.5281/zenodo.19647159)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
-[![Latest: paper-v6.8.1](https://img.shields.io/badge/latest-paper--v6.8.1-brightgreen.svg)](https://github.com/CIRWEL/unitares-paper-v6/releases/latest)
+[![Latest: paper-v6.8.2](https://img.shields.io/badge/latest-paper--v6.8.2-brightgreen.svg)](https://github.com/CIRWEL/unitares-paper-v6/releases/latest)
 
-- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (30 pages, latest tag [`paper-v6.8.1`](https://github.com/CIRWEL/unitares-paper-v6/releases/tag/paper-v6.8.1))
+- 📄 [`unitares-v6.pdf`](./unitares-v6.pdf) — the paper (30 pages, latest tag [`paper-v6.8.2`](https://github.com/CIRWEL/unitares-paper-v6/releases/tag/paper-v6.8.2))
 - 📝 [`unitares-v6.tex`](./unitares-v6.tex) — LaTeX source
 - 🖼 [`figures/`](./figures/) — 6 figures from deployment data (Feb 20, 2026 snapshot; Apr 18, 2026 30-day window)
 - 🗒 [Release history](https://github.com/CIRWEL/unitares-paper-v6/releases) — per-version notes and frozen PDFs
@@ -89,11 +89,11 @@ Per-release notes and frozen PDFs are on the [GitHub releases page](https://gith
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.19647159},
   url       = {https://doi.org/10.5281/zenodo.19647159},
-  version   = {v6.8.1}
+  version   = {v6.8.2}
 }
 ```
 
-The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.8.1`) has its own version DOI.
+The concept DOI above resolves to the latest version; each tagged release (`paper-v6.0` through `paper-v6.8.2`) has its own version DOI.
 
 ## License
 

@@ -4,7 +4,8 @@
   "creators": [
     {
       "name": "Wang, Kenny",
-      "affiliation": "CIRWEL Systems"
+      "affiliation": "CIRWEL Systems",
+      "orcid": "0009-0006-7544-2374"
     }
   ],
   "upload_type": "publication",
@@ -30,5 +31,5 @@
       "scheme": "url"
     }
   ],
-  "notes": "Phase 1 of the EISV grounding program. Per-class calibration results are deferred to subsequent work. Supersedes earlier UNITARES formulations (v3, v5) that used a thermodynamically-inspired phenomenological framing."
+  "notes": "Phase 1 of the EISV grounding program. Per-class calibration results are deferred to subsequent work."
 }
