@@ -1372,6 +1372,30 @@ specific numbers. The numbers belong to the empirical
 appendix that lands with Phase 2 calibration; the protocol is a
 design commitment that survives any specific fleet composition.
 
+\begin{remark}[Calibration as evidence of precision miscalibration]
+\label{rem:calibration-precision}
+Under the FEP reading of \Cref{sec:grounding} ($E = -F$, with $F$
+a variational free energy built from precision-weighted prediction
+errors), precision is the inverse variance of the likelihood on
+observations. Calibration deviation---the empirical mismatch
+between an agent's stated confidence and the frequency with which
+its claims are corroborated---is not literally identical to
+precision deviation. It is \emph{evidence} of precision
+miscalibration under one assumption: the agent's reported
+confidence proxies the inverse-variance weighting its generative
+model places on its predictions. Under that assumption, a
+systematically overconfident agent is one that has placed
+too-high precision on low-quality evidence, and the calibration
+protocol above becomes an empirical handle on precision
+miscalibration. When the assumption fails---e.g., reported
+confidence is shaped by a constitutional statement rather than a
+likelihood weight, or by a tokenized probability that is not the
+agent's own precision---the protocol still measures something
+operationally useful, but its FEP-native reading weakens. The
+protocol stands on its own; the precision reading is a bridge to
+the active-inference literature, not a claim of equivalence.
+\end{remark}
+
 
 % ═══════════════════════════════════════════════════════════
 \section{Stochastic Extensions}
