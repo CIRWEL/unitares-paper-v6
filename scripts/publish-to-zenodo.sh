@@ -125,12 +125,23 @@ for fid in $inherited_ids; do
 done
 
 upload_to_bucket() {
+  # Uses curl --upload-file (-T), which sends the raw bytes as a PUT with
+  # no default Content-Type. --data-binary PUT was previously used and
+  # sent Content-Type: application/x-www-form-urlencoded, which Zenodo's
+  # bucket endpoint began rejecting with HTTP 415. --upload-file is the
+  # correct primitive for binary PUT to object storage.
   local local_path="$1" remote_name="$2"
+  local status
   echo "    uploading ${remote_name} ($(wc -c <"$local_path") bytes)"
-  curl -sS -X PUT "${API_AUTH[@]}" \
-    --data-binary "@${local_path}" \
+  status="$(curl -sS "${API_AUTH[@]}" \
+    --upload-file "${local_path}" \
     "${bucket_url}/${remote_name}" \
-    -o /dev/null -w "    HTTP %{http_code}\n"
+    -o /dev/null -w "%{http_code}")"
+  echo "    HTTP ${status}"
+  [[ "$status" =~ ^20[01]$ ]] || {
+    echo "error: upload ${remote_name} returned HTTP ${status}" >&2
+    exit 71
+  }
 }
 
 echo "==> Uploading files"

@@ -66,6 +66,11 @@ jobs:
         env:
           ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
         run: |
+          # Default GHA bash is `bash -e {0}` (no pipefail), which meant a
+          # failing script piped through tee exited 0 and the workflow went
+          # green while Zenodo silently rejected the upload. pipefail makes
+          # the publish step fail honestly.
+          set -eo pipefail
           chmod +x scripts/publish-to-zenodo.sh
           ./scripts/publish-to-zenodo.sh \
             "${{ github.event.release.tag_name }}" \
