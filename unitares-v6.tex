@@ -54,15 +54,17 @@ of Heterogeneous Agent Fleets}
 
 % ─── Abstract ──────────────────────────────────────────────
 \begin{abstract}
-We present UNITARES, a governance framework for heterogeneous fleets
-of autonomous AI agents. Each agent carries a four-dimensional state
-vector $\eisv = (E, I, S, V)^\top$ intended to support continuous
-governance rather than discrete after-the-fact filtering. The central
-design constraint is heterogeneity: the populations we govern include
-embodied agents with sensor-driven state, persistent autonomous
-services, session-bounded coding assistants, and ephemeral parser
-agents. These do not share an output modality, a tempo, or a healthy
-operating point, so fleet-wide normalization is the wrong target.
+UNITARES is a runtime governance layer for heterogeneous AI-agent
+fleets. It tracks continuous agent state, calibrates by class,
+detects drift, and issues governance interventions with auditable
+provenance. Each agent carries a four-dimensional state vector
+$\eisv = (E, I, S, V)^\top$ updated on every check-in, intended to
+support continuous governance rather than discrete after-the-fact
+filtering. Fleet-wide normalization is the wrong target: the
+populations we govern---embodied agents with sensor-driven state,
+persistent autonomous services, session-bounded coding assistants,
+and ephemeral parser agents---do not share an output modality, a
+tempo, or a healthy operating point.
 
 UNITARES addresses this with two structural moves. First, it
 reinterprets the EISV coordinates in information-theoretic terms:
