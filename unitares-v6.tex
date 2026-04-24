@@ -2313,6 +2313,30 @@ behavioral--epistemic drift vector (\Cref{sec:ethical-drift}),
 and multi-agent extensions (\Cref{sec:network}) form the rest of
 the governance surface alongside these two commitments.
 
+The current verdict surface---\texttt{proceed}, \texttt{guide},
+\texttt{pause}, \texttt{reject}---is threshold-triggered from the
+CIRS v2 control law (\Cref{sec:governor}), not derived from the
+minimization of an expected free energy. A principled extension
+under active inference~\citep{parr2022active,dacosta2020active}
+would recast governance interventions as policy selections that
+minimize expected free energy over future trajectories; the current
+framework monitors free-energy proxies and intervenes via
+phase-conditioned thresholds. We do not claim the existing verdicts
+are active-inference actions, and the reframing is future work.
+
+A cleaner identification of the deferred step: Tier-1 computation
+of $-F$ (\Cref{sec:grounding-quantities}) requires an explicit
+generative model $p(z, o)$ of the agent. For closed-weights frontier
+agents, it is not obvious what that generative model \emph{is} in
+the strict variational sense. The weights are not directly
+accessible; a tokenized posterior over next tokens is a tractable
+but coarse surrogate; a semantic generative model over tool-use
+trajectories is richer but speculative. Which choice, if any,
+supports a faithful $-F$ estimator is an open methodological
+problem, not an engineering deferral. The natural empirical test
+is whether a candidate $\hat{F}$ adds predictive value over the
+current EISV proxies; that horse race is left to subsequent work.
+
 As autonomous AI agents become more prevalent, governance
 frameworks must accommodate the heterogeneity of the populations
 they govern---embodied creatures, persistent observers,
