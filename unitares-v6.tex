@@ -615,11 +615,19 @@ We adopt a Shannon plus variational (free-energy) hybrid. Shannon
 information theory gives genuinely computable entropy and mutual
 information from agent outputs---data already captured by the tool
 usage recorder and the governance audit log. The Free Energy Principle
-\citep{friston2010free} gives a coherent top-level dynamic: agent
-drift corresponds to rising variational free energy, and governance
-becomes free-energy monitoring. The FEP inherits a derivation from
-statistical mechanics through variational Bayes, giving us a real
-ancestry for the free-energy quantity we already had in $V$.
+\citep{friston2010free} supplies the \emph{target} formalization: under
+FEP, agent drift corresponds to rising variational free energy, and
+free-energy monitoring is the asymptote toward which governance aims.
+Tier-1 instrumentation of the agent's generative model is not
+currently available for closed-weights frontier agents; until it is,
+the deployed system uses provenance-tagged proxies for each
+coordinate (\Cref{sec:grounding-quantities}) and flags each channel's
+tier on a per-agent-turn basis, so downstream consumers can read the
+coordinate alongside its estimator commitment. The FEP inherits a
+derivation from statistical mechanics through variational Bayes,
+giving a real ancestry for the free-energy quantity interpreted in
+$V$, even when $V$ is currently driven by the proxy form in
+\Cref{eq:V-grounded} rather than a Tier-1 residual.
 
 Alternatives considered and rejected: pure control-theoretic
 Lyapunov framing (abandons the thermodynamic lineage entirely);
@@ -650,6 +658,7 @@ The symbols $\{E, I, S, V, C\}$ are retained for continuity with
 deployed systems; their semantic load is now the right column.
 
 \subsection{Quantity Redefinitions}
+\label{sec:grounding-quantities}
 
 Each coordinate of \eisv\ receives (a) a formal information-theoretic
 definition, (b) a tiered computation recipe in order of preference,
