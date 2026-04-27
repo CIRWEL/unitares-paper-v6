@@ -2294,6 +2294,23 @@ the same infrastructure.
   counterfactual (\Cref{sec:verdict-counterfactual}) on identities
   that post-date those revisions is the natural validation path and
   is deferred to subsequent work.
+\item Tactical calibration in epoch~2 was grounded against
+  \texttt{test\_*} outcomes only. Tests are a high-prior signal --- they
+  are run only when expected to pass --- producing empirical accuracy
+  pinned at $1.0$ and a structurally under-confident calibration read
+  regardless of agent behavior. As of governance epoch~3 the truth
+  channel was broadened to \texttt{test\_*} $\cup$ \texttt{task\_*} so
+  the empirical-accuracy denominator is paired with a real-failure
+  source (\texttt{task\_failed}), and the runtime API surfaces
+  reliability per channel rather than a single aggregate verdict. A
+  reporting-hygiene guard
+  (\texttt{bad\_rate\_pinned\_to\_zero}) flags any channel whose
+  rolling-window failure rate collapses to zero with non-trivial
+  sample volume, so the same pathology cannot quietly recur on a
+  future channel. \texttt{cirs\_resonance} is deliberately excluded
+  from the tactical channel: it is a detector output, not a
+  prediction outcome, and carries no stated-confidence anchor against
+  which empirical accuracy can be measured.
 \end{enumerate}
 
 % ═══════════════════════════════════════════════════════════
