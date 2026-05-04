@@ -13,7 +13,7 @@
 
 ---
 
-**In one line:** UNITARES is a runtime governance layer for heterogeneous AI-agent fleets. It tracks continuous agent state, calibrates by class, detects drift, and issues governance interventions with auditable provenance.
+**In one line:** UNITARES tracks each AI agent's behavioral state continuously, intervenes when an agent starts drifting, and produces an audit trail of the interventions.
 
 ---
 
