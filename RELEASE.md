@@ -32,7 +32,7 @@ UNITARES addresses this with two structural moves. First, it reinterprets the EI
 
 Because UNITARES was already deployed, re-grounding the coordinates raised a live-systems problem in addition to a mathematical one. We therefore introduce a pipeline-ordering migration mechanism that preserves governance behavior while allowing grounded values to populate canonical response fields. Stability of the dynamics is preserved under the reformulation and established by contraction analysis (Appendix B).
 
-We illustrate the framework with a production deployment snapshot from February 20, 2026, covering 903 registered agents and 75 active agents. These results should be read as partial deployment evidence for the framework and migration strategy, not as full empirical validation of the class-conditional grounding. Per-class calibration results and higher-tier estimators (logprob and multi-sample) are deferred to subsequent work.
+We illustrate the framework with a historical production deployment snapshot from February 20, 2026 (taken against the v5 SQLite governance store, retired during the January 2026 PostgreSQL migration), covering 903 registered agents and 75 active agents. These results should be read as partial deployment evidence for the framework and migration strategy, not as full empirical validation of the class-conditional grounding. Per-class calibration results and higher-tier estimators (logprob and multi-sample) are deferred to subsequent work.
 ```
 
 **Publication date:** `2026-04-18` (or the date you actually upload)

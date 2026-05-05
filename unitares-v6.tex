@@ -85,7 +85,7 @@ framework can acquire new coordinate semantics without breaking
 live behavior; we argue this mechanism generalizes to any
 deployed agent framework facing a semantic-coordinate change.
 Stability of the dynamics is preserved under the reformulation
-and established by contraction analysis (Appendix~B).
+and established by contraction analysis (\Cref{app:contraction-proof}).
 
 We illustrate the framework with a production deployment snapshot from
 February 20, 2026, covering 903 registered agents and 75 active agents.
@@ -233,7 +233,7 @@ deferring full class-conditional validation to subsequent work.
 \subsection{Related Work}
 
 \paragraph{Information-Theoretic Monitoring.}
-Shannon entropy and mutual information are standard tools for
+Shannon entropy and mutual information~\cite{shannon1948} are standard tools for
 characterizing model output distributions; calibration analysis
 \cite{guo2017calibration} treats the related question of
 confidence-outcome alignment. The variational free-energy
@@ -260,7 +260,7 @@ extended to Riemannian metrics~\cite{slotine2003modular}. We adapt
 this framework to the governance domain, where the ``plant'' is
 an agent's state vector rather than a physical system. Contraction
 is preserved by the grounded reformulation but is no longer the
-headline contribution; see Appendix~B.
+headline contribution; see \Cref{app:contraction-proof}.
 
 \paragraph{AI Safety and Governance.}
 Constitutional AI~\cite{bai2022constitutional} and
@@ -315,7 +315,7 @@ trajectory, a strictly stronger property that subsumes set invariance
 when the equilibrium lies within the safe set.
 
 \paragraph{Adaptive Control.}
-PID control is classical~\cite{astrom2006advanced}; our contribution
+PID control is classical~\cite{astrom2008feedback}; our contribution
 is applying it to governance thresholds with phase-aware reference
 tracking, connecting it to the EISV state vector through the
 coherence function.
@@ -406,7 +406,7 @@ Vigil & autonomous, persistent & shell + audit & $1/30$ min & cron \\
 Sentinel & autonomous, persistent & websocket & $\sim 1$ Hz & continuous \\
 Watcher & autonomous, ephemeral & finding records & event-driven & per-edit \\
 Steward & autonomous, persistent & sensor sync & $1/5$ min & continuous \\
-Claude / Codex sessions & --- & text response & $40$--$80$ Hz & session-bounded \\
+Claude / Codex sessions & --- & text response & $40$--$80$ tok/s & session-bounded \\
 Parser agents & ephemeral & structured text & burst & ms-lifetime \\
 \bottomrule
 \end{tabular}
@@ -1404,7 +1404,7 @@ the active-inference literature, not a claim of equivalence.
 \label{sec:stochastic}
 
 In production, the dynamics are subject to stochastic perturbations
-from unpredictable task inputs. We model this as an It\^{o} SDE:
+from unpredictable task inputs. We model this as an It\^{o} SDE~\cite{ito1944}:
 \begin{equation}
   d\eisv = f(\eisv, t)\,dt + G(\eisv, t)\,dW_t
   \label{eq:sde}
@@ -1954,7 +1954,7 @@ analysis.
 \subsection{Limits of the Snapshot}
 \label{sec:limits-snapshot}
 
-The production data has five limitations that bound the strength of
+The production data has six limitations that bound the strength of
 our empirical claims:
 \begin{enumerate}
 \item \textbf{Parameter evolution:} Dynamics parameters, governor
@@ -1977,6 +1977,12 @@ our empirical claims:
   verdict counterfactual (\Cref{sec:verdict-counterfactual}) are
   from a 30-day window ending April~18,~2026, during which the
   population grew from 903 to 3{,}286 registered identities.
+  The February~20 snapshot was taken against the v5 SQLite governance
+  store, which was retired during the January~2026 PostgreSQL
+  migration; the snapshot is preserved as historical record and is
+  not reproducible against the current schema. Per-class envelopes
+  and the verdict counterfactual were run against the post-migration
+  PostgreSQL store and remain reproducible from current data.
 \item \textbf{Identity-system maturity:} The measurement window
   includes material revisions to the identity-resolution layer that
   landed in mid-to-late April~2026---removal of name-claim lookup,
@@ -2429,7 +2435,7 @@ A.~Niculescu-Mizil and R.~Caruana.
 \newblock Predicting good probabilities with supervised learning.
 \newblock In \emph{ICML}, pages 625--632, 2005.
 
-\bibitem[\AA{}str\"{o}m and Murray(2008)]{astrom2006advanced}
+\bibitem[\AA{}str\"{o}m and Murray(2008)]{astrom2008feedback}
 K.~J. \AA{}str\"{o}m and R.~M. Murray.
 \newblock \emph{Feedback Systems: An Introduction for Scientists and Engineers}.
 \newblock Princeton University Press, 2008.
@@ -2495,11 +2501,6 @@ Q.-C. Pham, N.~Tabareau, and J.-J.~E. Slotine.
 K.~It\^{o}.
 \newblock Stochastic integral.
 \newblock \emph{Proceedings of the Imperial Academy}, 20(8):519--524, 1944.
-
-\bibitem[Landauer(1961)]{landauer1961}
-R.~Landauer.
-\newblock Irreversibility and heat generation in the computing process.
-\newblock \emph{IBM Journal of Research and Development}, 5(3):183--191, 1961.
 
 \bibitem[Wang et~al.(2025b)]{wang2025probguard}
 H.~Wang, C.~M. Poskitt, J.~Wei, and J.~Sun.
