@@ -563,11 +563,13 @@ The entropy source term $\lambda_1(\Theta)$ is adaptive, coupling the
 governance parameter vector $\Theta$ to the dynamics:
 \begin{equation}
   \lambda_1(\Theta) = \lambda_{1,\min} +
-  \frac{\eta_1 - \eta_{1,\min}}{\eta_{1,\max} - \eta_{1,\min}}
+  \frac{s_1 - s_{1,\min}}{s_{1,\max} - s_{1,\min}}
   \cdot (\lambda_{1,\max} - \lambda_{1,\min})
   \label{eq:lambda1}
 \end{equation}
-where $\eta_1 \in [0.1, 0.5]$ maps to $\lambda_1 \in [0.05, 0.20]$.
+where $s_1 \in [0.1, 0.5]$ is the drift-sensitivity parameter
+(distinct from the drift vector $\bm\eta$ defined in
+\Cref{def:drift}) and maps to $\lambda_1 \in [0.05, 0.20]$.
 Higher drift sensitivity increases entropy injection, creating
 a natural feedback loop: drifting agents become more uncertain, which
 in turn triggers conservative governance decisions.
