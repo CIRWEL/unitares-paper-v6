@@ -580,13 +580,18 @@ The scalar governance signal is:
   \label{eq:phi}
 \end{equation}
 with default weights $w_E = w_I = w_S = w_V = w_\eta = 0.5$.
+We use $\Phi$ here as a scalar governance signal; the symbol is
+unrelated to the integrated-information $\Phi$ of integrated
+information theory.
 Governance verdicts follow thresholds: $\Phi \geq 0.15$ (proceed),
 $0 \leq \Phi < 0.15$ (caution), $\Phi < 0$ (high-risk/pause).
 
 \begin{remark}
 The threshold $\Phi = 0.15$ is calibrated empirically: a healthy
 agent with $E = 0.7$, $I = 0.8$, $S = 0.2$ yields $\Phi \approx
-0.15$.
+0.15$. These values are illustrative; per-class healthy operating
+points (\Cref{sec:phase-2-measurement}) refine this calibration in
+deployment.
 \end{remark}
 
 
@@ -617,7 +622,7 @@ We adopt a Shannon plus variational (free-energy) hybrid. Shannon
 information theory gives genuinely computable entropy and mutual
 information from agent outputs---data already captured by the tool
 usage recorder and the governance audit log. The Free Energy Principle
-\citep{friston2010free} supplies the \emph{target} formalization: under
+\cite{friston2010free} supplies the \emph{target} formalization: under
 FEP, agent drift corresponds to rising variational free energy, and
 free-energy monitoring is the asymptote toward which governance aims.
 Tier-1 instrumentation of the agent's generative model is not
@@ -632,7 +637,7 @@ $V$, even when $V$ is currently driven by the proxy form in
 \Cref{eq:V-grounded} rather than a Tier-1 residual.
 
 Alternatives considered and rejected: pure control-theoretic
-Lyapunov framing (abandons the thermodynamic lineage entirely);
+Lyapunov framing (abandons the FEP/free-energy lineage entirely);
 information geometry with Fisher metric (more machinery than the
 framework needs at this stage); pure statistical mechanics with a
 partition function (requires defining a Hamiltonian analog for agent
@@ -1602,7 +1607,7 @@ deferred to subsequent work, as discussed in
 $E$ & 0.766 & 0.087 & $[0.60, 1.00]$ \\
 $I$ & 0.877 & 0.111 & $[0.59, 1.00]$ \\
 $S$ & 0.082 & 0.045 & $[0.01, 0.20]$ \\
-$V$ & $-0.033$ & 0.028 & $[-0.09, 0.01]$ \\
+$V$ & $-0.033$ & 0.028 & $[-0.089, 0.007]$ \\
 $C(V)$ & 0.483 & 0.012 & $[0.46, 0.50]$ \\
 \bottomrule
 \end{tabular}
@@ -2349,7 +2354,7 @@ The current verdict surface---\texttt{proceed}, \texttt{guide},
 \texttt{pause}, \texttt{reject}---is threshold-triggered from the
 CIRS v2 control law (\Cref{sec:governor}), not derived from the
 minimization of an expected free energy. A principled extension
-under active inference~\citep{parr2022active,dacosta2020active}
+under active inference~\cite{parr2022active,dacosta2020active}
 would recast governance interventions as policy selections that
 minimize expected free energy over future trajectories; the current
 framework monitors free-energy proxies and intervenes via
