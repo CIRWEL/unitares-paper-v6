@@ -40,42 +40,19 @@ jobs:
           test -f .zenodo.json || { echo "::error::.zenodo.json not found"; exit 1; }
           test -f scripts/publish-to-zenodo.sh || { echo "::error::scripts/publish-to-zenodo.sh missing"; exit 1; }
 
-      - name: Build source archive (matches GitHub default layout)
-        id: archive
-        run: |
-          tag="${{ github.event.release.tag_name }}"
-          repo_slug="${{ github.event.repository.full_name }}"
-          repo_dashed="${repo_slug//\//-}"
-          short_sha="$(git rev-parse --short=7 HEAD)"
-          stage_dir="${repo_dashed}-${short_sha}"
-          out_zip="${repo_dashed}-${tag}.zip"
-
-          mkdir -p "/tmp/staging/${stage_dir}"
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.worktrees' \
-            --exclude='.gitignore' \
-            ./ "/tmp/staging/${stage_dir}/"
-
-          (cd /tmp/staging && zip -qr "${out_zip}" "${stage_dir}")
-          mv "/tmp/staging/${out_zip}" "./${out_zip}"
-          echo "zip_path=${out_zip}" >>"$GITHUB_OUTPUT"
-
-      - name: Publish to Zenodo
+      - name: Publish to Zenodo (PDF only)
         env:
           ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
         run: |
-          # Default GHA bash is `bash -e {0}` (no pipefail), which meant a
-          # failing script piped through tee exited 0 and the workflow went
-          # green while Zenodo silently rejected the upload. pipefail makes
-          # the publish step fail honestly.
+          # PDF-only deposit: readers get a clean Zenodo record with just the
+          # paper, no .github/FUNDING.yml or other repo bric-a-brac bundled in.
+          # The git tag remains the source-of-truth for reproducing the build.
+          # pipefail so a failing script doesn't go green via `tee`.
           set -eo pipefail
           chmod +x scripts/publish-to-zenodo.sh
           ./scripts/publish-to-zenodo.sh \
             "${{ github.event.release.tag_name }}" \
             "unitares-v6.pdf" \
-            "${{ steps.archive.outputs.zip_path }}" \
             | tee zenodo-publish.log
 
       - name: Append Zenodo DOI to release notes

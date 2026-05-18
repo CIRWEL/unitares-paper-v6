@@ -11,7 +11,11 @@
 #   https://zenodo.org/account/settings/github/repository/CIRWEL/unitares-paper-v6
 #
 # Usage (from repo root):
-#   ZENODO_TOKEN=xxx ./scripts/publish-to-zenodo.sh paper-v6.8.2 unitares-v6.pdf source.zip
+#   ZENODO_TOKEN=xxx ./scripts/publish-to-zenodo.sh paper-v6.8.2 unitares-v6.pdf [source.zip]
+#
+# The source-zip argument is optional. Omit it to publish a PDF-only record
+# (cleaner for readers; avoids shipping .github/FUNDING.yml and other repo
+# bric-a-brac inside the archive).
 #
 # Optional env:
 #   ZENODO_CONCEPT_RECID  Concept record ID (default: 19647159 — the v6 concept DOI)
@@ -23,14 +27,14 @@
 
 set -euo pipefail
 
-if [[ $# -lt 3 ]]; then
-  echo "usage: $0 <tag> <pdf-path> <source-zip-path>" >&2
+if [[ $# -lt 2 ]]; then
+  echo "usage: $0 <tag> <pdf-path> [source-zip-path]" >&2
   exit 64
 fi
 
 TAG="$1"
 PDF_PATH="$2"
-ZIP_PATH="$3"
+ZIP_PATH="${3:-}"
 # Keep the full tag as the Zenodo version string for consistency with prior
 # releases (e.g. "paper-v6.8.1"). Existing concept history uses this form.
 VERSION="$TAG"
@@ -43,7 +47,9 @@ if [[ -z "${ZENODO_TOKEN:-}" ]]; then
   exit 64
 fi
 
-for f in "$PDF_PATH" "$ZIP_PATH" .zenodo.json; do
+required_files=("$PDF_PATH" .zenodo.json)
+[[ -n "$ZIP_PATH" ]] && required_files+=("$ZIP_PATH")
+for f in "${required_files[@]}"; do
   [[ -f "$f" ]] || { echo "error: missing file: $f" >&2; exit 66; }
 done
 
@@ -146,7 +152,9 @@ upload_to_bucket() {
 
 echo "==> Uploading files"
 upload_to_bucket "$PDF_PATH" "$(basename "$PDF_PATH")"
-upload_to_bucket "$ZIP_PATH" "$(basename "$ZIP_PATH")"
+if [[ -n "$ZIP_PATH" ]]; then
+  upload_to_bucket "$ZIP_PATH" "$(basename "$ZIP_PATH")"
+fi
 
 echo "==> Updating metadata"
 metadata="$(jq --arg v "$VERSION" \
